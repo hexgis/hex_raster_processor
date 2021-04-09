@@ -88,18 +88,12 @@ class Composer:
             print('-- Creating file composition to {}'.format(filepath))
             quiet_param = ''
 
-        command = Composer.get_gdal_merge_command().format(
-            quiet=quiet, output_path=filepath)
+        command = Composer.get_gdal_merge_command()
+        command = command.format(
+            quiet=quiet_param, output_path=filepath)
         command += ' '.join(map(str, ordered_filelist))
 
-        try:
-            Utils._subprocess(command)
-        except subprocess.CalledProcessError as exc:
-            logger.error(
-                'Error while executing gdal_constrast_stretch process.'
-                'Input file: {}. Exception: {}.'.format(input_file, exc)
-            )
-            raise
+        Utils._subprocess(command)
 
         is_valid = Utils.validate_image_bands(filepath, ordered_filelist)
 
