@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  test:
+    image: us.gcr.io/custom-plating-209314/hex_raster_processor
+    build: .
+    command: >
+      bash -c "
+      python setup.py install
+      && python setup.py test"
+    volumes:
+      - .:/app/
