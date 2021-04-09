@@ -4,12 +4,14 @@
 import os
 import subprocess
 import tempfile
+import logging
 
 from osgeo import ogr, osr
-
 from .composer import Composer
 from .utils import Utils
 from .gdal_datasets import GdalDatasets
+
+logger = logging.getLogger()
 
 
 class GdalUtils(GdalDatasets):
@@ -59,7 +61,8 @@ class GdalUtils(GdalDatasets):
             command (str): gdaldem color-relief command format
                 Parameters: input, color_text and output paramters
         """
-        return "gdaldem color-relief -alpha {input_path} {color_text} {output_path}"
+        return 'gdaldem color-relief -alpha ' + \
+            '{input_path} {color_text} {output_path}'
 
     @classmethod
     def create_composition_thumbs(cls, ordered_images: list):
@@ -84,7 +87,7 @@ class GdalUtils(GdalDatasets):
                 bands=bands
             )
         except Exception as exc:
-            logger.log('Error at GdalUtils create_compositon_thumbs '
+            logger.log('Error at GdalUtils create_compositon_thumbs ' +
                        'for {} with exception: {}'.format(ordered_images, exc))
             raise
 
