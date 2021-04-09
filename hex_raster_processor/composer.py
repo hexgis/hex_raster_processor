@@ -29,22 +29,18 @@ class Composer:
             str: output_path joined with type name
         """
 
-        if (filename.endswith(".TIF") or
-            filename.endswith(".tif") or
-            filename.endswith(".tiff") or
-                filename.endswith(".TIFF")):
-            file_path = os.path.join(output_path, filename)
-        else:
-            file_path = os.path.join(
-                output_path,
-                "{}_{}.TIF".format(filename, type_name)
-            )
+        if filename.endswith(".TIF") or \
+           filename.endswith(".tif") or \
+           filename.endswith(".tiff") or \
+           filename.endswith(".TIFF"):
+            return os.path.join(output_path, filename)
 
-        return file_path
+        filename = "{}_{}.TIF".format(filename, type_name)
+        return os.path.join(output_path, filename)
 
     @classmethod
     def get_gdal_merge_command(cls):
-        """ Void metho to get gdal merge shell command.
+        """ Void method to get gdal merge shell command.
         docs in https://gdal.org/programs/gdal_merge.html
 
         Returns:
@@ -61,8 +57,8 @@ class Composer:
         bands: list,
         quiet: bool = True
     ):
-        """Creates image composition using gdal_merge.py with ordered filelist.
-        docs available in https://gdal.org/programs/gdal_merge.html
+        """Creates image composition using gdal_merge.py with ordered filelist
+        docs available in https://gdal.org/programs/gdal_merge.html.
 
         Args:
             filename (str): output name for file.
@@ -86,25 +82,26 @@ class Composer:
             type_name=type_name
         )
 
+        quiet_param = '-q'
+
         if not quiet:
             print('-- Creating file composition to {}'.format(filepath))
             quiet_param = ''
-        else:
-            quiet_param = '-q'
 
         command = Composer.get_gdal_merge_command().format(
             quiet=quiet, output_path=filepath)
-        command += " ".join(map(str, ordered_filelist]))
+        command += ' '.join(map(str, ordered_filelist))
 
         try:
-            processed_image = process = Utils._subprocess(command)
+            Utils._subprocess(command)
         except subprocess.CalledProcessError as exc:
             logger.error(
                 'Error while executing gdal_constrast_stretch process.'
-                'Input file: {}. Exception: {}.'.format(input_file, exc))
+                'Input file: {}. Exception: {}.'.format(input_file, exc)
+            )
             raise
 
-        is_valid=Utils.validate_image_bands(filepath, ordered_filelist)
+        is_valid = Utils.validate_image_bands(filepath, ordered_filelist)
 
         if is_valid:
             return {

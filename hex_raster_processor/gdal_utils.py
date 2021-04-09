@@ -21,27 +21,31 @@ class GdalUtils(GdalDatasets):
     """
 
     @classmethod
-    def get_gdal_outsize_command(cls, scale=True, quiet=True):
+    def get_gdal_outsize_command(
+        cls,
+        scale: bool = True,
+        quiet: bool = True
+    ):
         """
-        Returns a gdal translate command to resize the image
+        Returns a gdal translate command to resize image.
         Check https://gdal.org/programs/gdal_translate.html for more details
 
         Arguments:
-            * scale (bool): scale image
-            * quiet (bool): verbose logs
+            scale (bool, optional): scale image
+            quiet (bool, optional): show logs
 
         Returns:
-            * command (str): gdal translate command with format parameters
-                Parameters: x, y, img_format, input and output
+            str: gdal translate command with format parameters.
+                string params: x, y, img_format, input_path and output_path
         """
         command = 'gdal_translate -ot Byte -outsize {x}% {y}%' \
-            ' -of {img_format} {input} {output}'
+            ' -of {img_format} {input_path} {output_path}'
 
         if scale:
-            command = command + ' -scale'
+            command += ' -scale '
 
         if quiet:
-            command = command + ' -q'
+            command += ' -q '
 
         return command
 
@@ -52,58 +56,59 @@ class GdalUtils(GdalDatasets):
         check http://www.gdal.org/gdaldem.html for more details
 
         Returns:
-            * command (str): gdaldem color-relief command format
+            command (str): gdaldem color-relief command format
                 Parameters: input, color_text and output paramters
         """
-        return "gdaldem color-relief -alpha {input} {color_text} {output}"
+        return "gdaldem color-relief -alpha {input_path} {color_text} {output_path}"
 
     @classmethod
-    def create_composition_thumbs(cls, ordered_images):
+    def create_composition_thumbs(cls, ordered_images: list):
         """
         Creates a temporary thumbnails for selected composition
 
         Arguments:
-            * ordered_images (list): ordered image list for composition
+            ordered_images (list): ordered image list for composition
 
         Returns:
-            * thumbs (str): path to created thumbs
+            tuple: path to created thumbs, filename
         """
         temp_file = tempfile.NamedTemporaryFile(suffix='.tif', delete=False)
-        out_path = tempfile.TemporaryDirectory()
+        output_path = tempfile.TemporaryDirectory()
         bands = [9, 9, 9]
+
         try:
             composition = Composer.create_composition(
                 ordered_filelist=ordered_images,
                 filename=temp_file.name,
-                out_path=out_path.name,
+                output_path=output_path.name,
                 bands=bands
             )
         except Exception as exc:
-            print("Error at GdalUtils create_compositon_thumbs "
-                  "for {} with exception: {}".format(ordered_images, exc))
-            return False
+            logger.log('Error at GdalUtils create_compositon_thumbs '
+                       'for {} with exception: {}'.format(ordered_images, exc))
+            raise
 
         return composition['path'], temp_file.name
 
     @staticmethod
     def thumbs(
-        input_image,
-        output,
-        size=[5, 5],
-        img_format='JPEG',
-        scale=True,
-        quiet=True
+        input_image: str,
+        output_path: str,
+        size: list = [15, 15],
+        img_format: str = 'JPEG',
+        scale: bool = True,
+        quiet: bool = True
     ):
         """
         Creates thumbnails for tif input image in JPEG format
 
         Arguments:
-            * input_image (str): input file path
-            * output (str): output filename in jpg format
-            * size (list): list of sizes in % X% Y%. Default: [5, 5]
+            input_image (str): input file path
+            output_path (str): output_path filename in jpg format
+            size (list): list of sizes in % X% Y%. Default: [5, 5]
 
         Returns:
-            * thumbs (str): JPEG path to created preview
+            thumbs (str): JPEG path to created preview
         """
         try:
             assert os.path.exists(input_image)
@@ -111,9 +116,9 @@ class GdalUtils(GdalDatasets):
                 quiet=quiet, scale=scale
             )
             command = command.format(
-                input=input_image,
+                input_path=input_image,
                 img_format=img_format,
-                output=output,
+                output_path=output_path,
                 x=size[0],
                 y=size[1]
             )
@@ -121,24 +126,24 @@ class GdalUtils(GdalDatasets):
         except AssertionError as exc:
             print("Input file does not exists "
                   "Exception at GdalUtils.thumbs with params: "
-                  "input_image={} output= {} and size=[{},{}]".format(
-                      input_image, output, size[0], size[1]))
+                  "input_image={} output_path= {} and size=[{},{}]".format(
+                      input_image, output_path, size[0], size[1]))
             raise ValueError(exc)
         except Exception as exc:
             print("Exception at GdalUtils.thumbs with params: "
-                  "input_image={} output= {} and size=[{},{}]".format(
-                      input_image, output, size[0], size[1]))
+                  "input_image={} output_path= {} and size=[{},{}]".format(
+                      input_image, output_path, size[0], size[1]))
             raise ValueError(exc)
 
-        if os.path.exists(output):
-            return output
+        if os.path.exists(output_path):
+            return output_path
 
         return False
 
     @staticmethod
     def composition_rgb_thumbs(
         ordered_images,
-        output,
+        output_path,
         size=[100, 100],
         scale=True,
         quiet=True
@@ -148,14 +153,14 @@ class GdalUtils(GdalDatasets):
         Creates a composition using Composer from raster_processor
 
         Arguments:
-            * ordered_images (list): ordered image list for composition
-            * output (str): output filename in jpg format
-            * size (list): list of sizes in % X% Y%. Default: [5, 5]
-            * scale (bool): scale image
-            * quiet (bool): verbose logs
+            ordered_images (list): ordered image list for composition
+            output_path (str): output path to file in jpg format
+            size (list): list of sizes in % X% Y%. Default: [5, 5]
+            scale (bool): scale image
+            quiet (bool): verbose logs
 
         Returns:
-            * A jpeg thumbnail
+            A jpeg thumbnail
         """
         files = []
         temp_files = dict()
@@ -169,9 +174,9 @@ class GdalUtils(GdalDatasets):
                 prefix='cmp', suffix='.tif'
             )
             thumbs_command = command.format(
-                input=img,
+                input_path=img,
                 img_format="GTiff",
-                output=temp_files[img].name,
+                output_path=temp_files[img].name,
                 x=size[0],
                 y=size[1],
             )
@@ -185,7 +190,7 @@ class GdalUtils(GdalDatasets):
         if composition:
             files.append(composition)
             thumbs = GdalUtils.thumbs(
-                input_image=composition, output=output
+                input_image=composition, output_path=output_path
             )
 
         return thumbs or False
@@ -201,13 +206,13 @@ class GdalUtils(GdalDatasets):
         Generates footprint for input tif image in WKT format
 
         Arguments:
-            * image_filename (str): path to file
-            * simplifly (float): number of distance tolerance for
+            image_filename (str): path to file
+            simplifly (float): number of distance tolerance for
                 simplification
-            * out_type (str): output data format. E.g.: WKT/JSON
+            out_type (str): output data format. E.g.: WKT/JSON
 
         Returns:
-            * geom (str): parsed geometry
+            geom (str): parsed geometry
         """
         temp_1 = tempfile.NamedTemporaryFile(prefix='fp', suffix='.tif')
         temp_2 = tempfile.NamedTemporaryFile(prefix='fp', suffix='.vrt')
@@ -265,16 +270,16 @@ class GdalUtils(GdalDatasets):
         is no applicable to default thumbs
 
         Arguments:
-            * input_image (str): input file path
-            * output_path (str): output path where file will be saved
-            * size (list): list of sizes in % X% Y%. Default: [5, 5]
-            * img_format (str): output image format. Default is: 'JPEG'
-            * img_type (str): type of image to create thumbs. Default: 'NDVI'
-            * scale (bool): scale image
-            * quiet (bool): verbose logs
+            input_image (str): input file path
+            output_path (str): output path where file will be saved
+            size (list): list of sizes in % X% Y%. Default: [5, 5]
+            img_format (str): output image format. Default is: 'JPEG'
+            img_type (str): type of image to create thumbs. Default: 'NDVI'
+            scale (bool): scale image
+            quiet (bool): verbose logs
 
         Returns:
-            * thumbs (str): JPEG path to created preview
+            thumbs (str): JPEG path to created preview
         """
         if not quiet:
             log = "-- Creating NDVI thumbs for {} image in {}"
@@ -287,19 +292,15 @@ class GdalUtils(GdalDatasets):
 
         command = GdalUtils.get_gdal_dem_color_command()
         command = command.format(
-            input=input_image,
+            input_path=input_image,
             color_text=color_text_file,
-            output=temp_file.name
+            output_path=temp_file.name
         )
-        try:
-            assert Utils._subprocess(command)
-        except Exception as exc:
-            log = "Error while Executing command {}: {}"
-            raise ValueError(log.format(log, exc))
+        Utils._subprocess(command)
 
         return GdalUtils.thumbs(
             input_image=temp_file.name,
-            output=output_path,
+            output_path=output_path,
             scale=scale,
             size=size,
             img_format=img_format
