@@ -1,0 +1,20 @@
+Welcome to Raster Processor package's documentation!
+======================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   readme
+   installation
+   usage
+   modules
+   contributing
+   authors
+   history
+
+Indices and tables
+==================
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
