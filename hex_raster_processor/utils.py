@@ -8,8 +8,6 @@ import subprocess
 import shutil
 import tempfile
 
-from datetime import datetime
-
 try:
     from osgeo import gdal
 except ImportError as error:
