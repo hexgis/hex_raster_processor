@@ -14,28 +14,32 @@ from .gdal_datasets import GdalDatasets
 
 class GdalUtils(GdalDatasets):
     """
-    Utility methods for Gdal processes and their results
+    Utility methods for Gdal processes and their results.
 
     Inherits from gdal_datasets::GdalDatasets to get
-    get_color_text_file classmethod for color text files
+    get_color_text_file classmethod for color text files.
     """
 
     @classmethod
-    def get_gdal_outsize_command(cls, scale=True, quiet=True):
-        """
-        Returns a gdal translate command to resize the image
-        Check https://gdal.org/programs/gdal_translate.html for more details
+    def get_gdal_outsize_command(
+        cls,
+        scale: bool = True,
+        quiet: bool = True
+    ):
+        """Returns a gdal translate command to resize the image.
+
+        Check https://gdal.org/programs/gdal_translate.html for more details.
 
         Arguments:
-            * scale (bool): scale image
-            * quiet (bool): verbose logs
+            scale (bool, optional): scale image
+            quiet (bool, optional): show logs
 
         Returns:
-            * command (str): gdal translate command with format parameters
-                Parameters: x, y, img_format, input and output
+            str: gdal translate shell command with string parameters
+                Parameters: x, y, img_format, input_path and output_path
         """
         command = 'gdal_translate -ot Byte -outsize {x}% {y}%' \
-            ' -of {img_format} {input} {output}'
+            ' -of {img_format} {input_path} {output_path}'
 
         if scale:
             command = command + ' -scale'
@@ -47,63 +51,72 @@ class GdalUtils(GdalDatasets):
 
     @classmethod
     def get_gdal_dem_color_command(cls):
-        """
-        Returns a gdaldem command to create a colorized image
+        """Returns a gdaldem command to create a colorized image.
+
         check http://www.gdal.org/gdaldem.html for more details
 
         Returns:
-            * command (str): gdaldem color-relief command format
-                Parameters: input, color_text and output paramters
+            str: gdaldem color-relief shell command with string parameters.
+                Parameters: input_path, color_text and output_path paramters
         """
-        return "gdaldem color-relief -alpha {input} {color_text} {output}"
+        return 'gdaldem color-relief -alpha {input_path}' \
+            ' {color_text} {output_path}'
 
     @classmethod
-    def create_composition_thumbs(cls, ordered_images):
-        """
-        Creates a temporary thumbnails for selected composition
+    def create_composition_thumbs(cls, ordered_filelist: list):
+        """Creates a temporary preview for selected composition.
 
         Arguments:
-            * ordered_images (list): ordered image list for composition
+            ordered_filelist (list): ordered image list for composition
 
         Returns:
-            * thumbs (str): path to created thumbs
+            tuple: path to created preview, temporary filename
         """
         temp_file = tempfile.NamedTemporaryFile(suffix='.tif', delete=False)
-        out_path = tempfile.TemporaryDirectory()
+        output_path = tempfile.TemporaryDirectory()
         bands = [9, 9, 9]
+
         try:
             composition = Composer.create_composition(
-                ordered_filelist=ordered_images,
+                ordered_filelist=ordered_filelist,
                 filename=temp_file.name,
-                out_path=out_path.name,
+                output_path=output_path.name,
                 bands=bands
             )
         except Exception as exc:
-            print("Error at GdalUtils create_compositon_thumbs "
-                  "for {} with exception: {}".format(ordered_images, exc))
-            return False
+            print('Error at GdalUtils create_compositon_thumbs '
+                  'for {} with exception: {}'.format(ordered_filelist, exc))
+            raise
 
         return composition['path'], temp_file.name
 
     @staticmethod
     def thumbs(
-        input_image,
-        output,
-        size=[5, 5],
-        img_format='JPEG',
-        scale=True,
-        quiet=True
+        input_image: str,
+        output_path: str,
+        size: list = [15, 15],
+        img_format: str = 'JPEG',
+        scale: bool = True,
+        quiet: bool = True
     ):
-        """
-        Creates thumbnails for tif input image in JPEG format
+        """Creates thumbnails for input image in JPEG format
+        using gdal_translate shell command.
 
-        Arguments:
-            * input_image (str): input file path
-            * output (str): output filename in jpg format
-            * size (list): list of sizes in % X% Y%. Default: [5, 5]
+        Args:
+            input_image (str):  input file path
+            output_path (str): output_path filename in jpg format
+            size (list, optional): list of sizes in % X% Y%. Default: [5, 5].
+                Defaults to [15, 15].
+            img_format (str, optional): output_path format. Defaults to 'JPEG'.
+            scale (bool, optional): scale image. Defaults to True.
+            quiet (bool, optional): show logs. Defaults to True.
+
+        Raises:
+            AssertionError: input image does not exists.
+            ValueError: error while creating thumbs.
 
         Returns:
-            * thumbs (str): JPEG path to created preview
+            str: path to created preview
         """
         try:
             assert os.path.exists(input_image)
@@ -113,49 +126,50 @@ class GdalUtils(GdalDatasets):
             command = command.format(
                 input=input_image,
                 img_format=img_format,
-                output=output,
+                output_path=output_path,
                 x=size[0],
                 y=size[1]
             )
             subprocess.call(command, shell=True)
         except AssertionError as exc:
-            print("Input file does not exists "
-                  "Exception at GdalUtils.thumbs with params: "
-                  "input_image={} output= {} and size=[{},{}]".format(
-                      input_image, output, size[0], size[1]))
-            raise ValueError(exc)
+            print('Input file does not exists '
+                  'Exception at GdalUtils.thumbs with params: '
+                  'input_image={} output_path= {} and size=[{},{}]'.format(
+                      input_image, output_path, size[0], size[1]))
+            raise
         except Exception as exc:
-            print("Exception at GdalUtils.thumbs with params: "
-                  "input_image={} output= {} and size=[{},{}]".format(
-                      input_image, output, size[0], size[1]))
-            raise ValueError(exc)
+            print('Exception at GdalUtils.thumbs with params: '
+                  'input_image={} output_path= {} and size=[{},{}]'.format(
+                      input_image, output_path, size[0], size[1]))
+            raise
 
-        if os.path.exists(output):
-            return output
+        if os.path.exists(output_path):
+            return output_path
 
         return False
 
     @staticmethod
     def composition_rgb_thumbs(
-        ordered_images,
-        output,
-        size=[100, 100],
-        scale=True,
-        quiet=True
+        ordered_images: list,
+        output_path: str,
+        size: list = [100, 100],
+        scale: bool = True,
+        quiet: bool = True
     ):
-        """
-        Generates a thumbnail for images on JPEG format
-        Creates a composition using Composer from raster_processor
+        """Generates a preview for ordered_images.
 
-        Arguments:
-            * ordered_images (list): ordered image list for composition
-            * output (str): output filename in jpg format
-            * size (list): list of sizes in % X% Y%. Default: [5, 5]
-            * scale (bool): scale image
-            * quiet (bool): verbose logs
+        Creates a composition using Composer from raster_processor.
+
+        Args:
+            ordered_images (list): ordered image list for composition
+            output_path (str): output_path filename in jpg format
+            size (list, optional): list of sizes in % X% Y%.
+                Defaults to [100, 100].
+            scale (bool, optional): scale image. Defaults to True.
+            quiet (bool, optional): show logs. Defaults to True.
 
         Returns:
-            * A jpeg thumbnail
+            str: path to created preview
         """
         files = []
         temp_files = dict()
@@ -171,7 +185,7 @@ class GdalUtils(GdalDatasets):
             thumbs_command = command.format(
                 input=img,
                 img_format="GTiff",
-                output=temp_files[img].name,
+                output_path=temp_files[img].name,
                 x=size[0],
                 y=size[1],
             )
@@ -185,30 +199,41 @@ class GdalUtils(GdalDatasets):
         if composition:
             files.append(composition)
             thumbs = GdalUtils.thumbs(
-                input_image=composition, output=output
+                input_image=composition, output_path=output_path
             )
 
         return thumbs or False
 
     @staticmethod
     def generate_footprint(
-        image_filename,
-        simplify=None,
-        out_type='wkt',
-        EPSG=4674
+        image_filename: str,
+        simplify: float: 0,
+        output_type: str = 'wkt',
+        EPSG: int = 4674
     ):
         """
         Generates footprint for input tif image in WKT format
 
         Arguments:
-            * image_filename (str): path to file
-            * simplifly (float): number of distance tolerance for
-                simplification
-            * out_type (str): output data format. E.g.: WKT/JSON
+            image_filename (str): 
+            simplifly (float): 
+            output_type (str): 
 
         Returns:
-            * geom (str): parsed geometry
+            geom (str): parsed geometry
+
+        Args:
+            image_filename (str): path to file.
+            simplify (float): number of distance tolerance for geometry
+                simplification.
+            output_type (str, optional): output data format. E.g.: WKT/JSON.
+                Defaults to 'wkt'.
+            EPSG (int, optional): SRID. Defaults to 4674.
+
+        Returns:
+            str: footprint data.
         """
+
         temp_1 = tempfile.NamedTemporaryFile(prefix='fp', suffix='.tif')
         temp_2 = tempfile.NamedTemporaryFile(prefix='fp', suffix='.vrt')
         temp_3 = tempfile.NamedTemporaryFile(prefix='fp', suffix='.vrt')
@@ -235,46 +260,51 @@ class GdalUtils(GdalDatasets):
         in_spatial_ref = layer.GetSpatialRef()
         out_spatial_ref = osr.SpatialReference()
         out_spatial_ref.ImportFromEPSG(EPSG)
-        coord_transf = osr.CoordinateTransformation(in_spatial_ref,
-                                                    out_spatial_ref)
+        coord_transf = osr.CoordinateTransformation(
+            in_spatial_ref, out_spatial_ref)
+
         if simplify:
             geom = geom.Simplify(simplify)
 
         geom.Transform(coord_transf)
 
-        if out_type == 'wkt':
-            output = geom.ExportToWkt()
-        elif out_type == 'json':
-            output = geom.ExportToJson()
-        return output
+        if output_type == 'wkt':
+            output_path = geom.ExportToWkt()
+        elif output_type == 'json':
+            output_path = geom.ExportToJson()
+
+        return output_path
 
     @staticmethod
     def create_normalized_thumbs(
-        input_image,
-        output_path,
-        size=[5, 5],
-        img_format='JPEG',
-        img_type='NDVI',
-        scale=False,
-        quiet=True
+        input_image: str,
+        output_path: str,
+        size: list = [15, 15],
+        img_format: str = 'JPEG',
+        img_type: str = 'NDVI',
+        scale: bool = False,
+        quiet: bool = True
     ):
-        """
-        *Creates thumbnails for tif input image in JPEG format*
+        """Creates preview for input image in JPEG `img_format`.
 
-        Used only to create ndvi thumbs because scale parameter
-        is no applicable to default thumbs
+        Do not use in case of default composition thumbs.
 
-        Arguments:
-            * input_image (str): input file path
-            * output_path (str): output path where file will be saved
-            * size (list): list of sizes in % X% Y%. Default: [5, 5]
-            * img_format (str): output image format. Default is: 'JPEG'
-            * img_type (str): type of image to create thumbs. Default: 'NDVI'
-            * scale (bool): scale image
-            * quiet (bool): verbose logs
+        Used only to create normalized thumbs that adds scale parameter
+        to command. 
+
+        Args:
+            input_image (str): input file path.
+            output_path (str): output path where file will be stored.
+            size (list, optional):list of sizes in % X% Y%.
+                Defaults to [15, 15].
+            img_format (str, optional): output image format.
+                Defaults to 'JPEG'.
+            img_type (str, optional): image preview type. Defaults to 'NDVI'.
+            scale (bool, optional): scale image. Defaults to False.
+            quiet (bool, optional): [description]. Defaults to True.
 
         Returns:
-            * thumbs (str): JPEG path to created preview
+            str: path to created preview.
         """
         if not quiet:
             log = "-- Creating NDVI thumbs for {} image in {}"
@@ -289,17 +319,14 @@ class GdalUtils(GdalDatasets):
         command = command.format(
             input=input_image,
             color_text=color_text_file,
-            output=temp_file.name
+            output_path=temp_file.name
         )
-        try:
-            assert Utils._subprocess(command)
-        except Exception as exc:
-            log = "Error while Executing command {}: {}"
-            raise ValueError(log.format(log, exc))
+
+        Utils._subprocess(command)
 
         return GdalUtils.thumbs(
             input_image=temp_file.name,
-            output=output_path,
+            output_path=output_path,
             scale=scale,
             size=size,
             img_format=img_format
