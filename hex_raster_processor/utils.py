@@ -116,12 +116,11 @@ class Utils:
         Returns:
             str: path to directory.
         """
-        if not os.path.exists(directory):
+        if not os.path.exists(directory) and \
+           not os.path.isdir(directory):
             os.makedirs(directory, check_exists=True)
 
-        if os.path.isdir(directory):
-            print("\n\nIs a directory\n\n")
-            return directory
+        return directory
 
     @staticmethod
     def validate_image_bands(image_path: str, filelist: list):
