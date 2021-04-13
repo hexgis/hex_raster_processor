@@ -98,7 +98,7 @@ class Composer:
 
         Utils._subprocess(command)
 
-        is_valid=Utils.validate_image_bands(file_path, ordered_filelist)
+        is_valid = Utils.validate_image_bands(file_path, ordered_filelist)
 
         if is_valid:
             return {
