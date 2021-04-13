@@ -6,7 +6,7 @@ services:
     build: .
     command: >
       bash -c "
-      python setup.py install
-      && python setup.py test"
+      python setup.py develop
+      && pytest"
     volumes:
       - .:/app/
