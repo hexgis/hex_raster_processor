@@ -12,7 +12,18 @@ class Image:
     """
 
     def __init__(self, image_path):
-        self.set_attributes(image_path)
+        self._set_image_attributes(image_path)
+
+    def _set_image_attributes(self, image_path: str):
+        """
+        Private method to set class Image attributes.
+
+        Args:
+            image_path (str): path to file to get path, dir and name.
+        """
+        self.image_path = os.path.abspath(image_path)
+        self.image_dir = os.path.dirname(self.image_path)
+        self.image_name = os.path.basename(self.image_path).split(".")[0]
 
     def remove_file(self):
         """ Removes file from system files. """
@@ -27,15 +38,4 @@ class Image:
         """
         new_path = os.path.join(self.image_dir, new_filename)
         os.rename(self.image_path, new_path)
-        self.set_attributes(os.path.join(self.image_dir, new_filename))
-
-    def set_attributes(self, image_path: str):
-        """
-        Set class Image attributes.
-
-        Args:
-            image_path (str): path to file to get path, dir and name.
-        """
-        self.image_path = os.path.abspath(image_path)
-        self.image_dir = os.path.dirname(self.image_path)
-        self.image_name = os.path.basename(self.image_path).split(".")[0]
+        self._set_image_attributes(os.path.join(self.image_dir, new_filename))

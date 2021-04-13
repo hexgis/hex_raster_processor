@@ -94,7 +94,7 @@ class Composer:
 
         command = Composer.get_gdal_merge_command()
         command = command.format(quiet=quiet, output_path=file_path)
-        command += " ".join(map(str, ordered_filelist]))
+        command += " ".join(map(str, ordered_filelist))
 
         Utils._subprocess(command)
 

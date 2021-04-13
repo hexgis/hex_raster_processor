@@ -210,7 +210,7 @@ class GdalUtils(GdalDatasets):
     @staticmethod
     def generate_footprint(
         image_filename: str,
-        simplify: float: 0,
+        simplify: float = 0,
         output_type: str = 'wkt',
         EPSG: int = 4674
     ):
