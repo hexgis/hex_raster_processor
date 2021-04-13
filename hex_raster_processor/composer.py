@@ -33,22 +33,18 @@ class Composer:
             str: output_path joined with type name
         """
 
-        if filename.endswith(".TIF") or
-           filename.endswith(".tif") or
-           filename.endswith(".tiff") or
+        if filename.endswith(".TIF") or \
+           filename.endswith(".tif") or \
+           filename.endswith(".tiff") or \
            filename.endswith(".TIFF"):
-            file_path = os.path.join(output_path, filename)
-        else:
-            file_path = os.path.join(
-                output_path,
-                "{}_{}.TIF".format(filename, type_name)
-            )
+            return os.path.join(output_path, filename)
 
-        return file_path
+        filename = "{}_{}.TIF".format(filename, type_name)
+        return os.path.join(output_path, filename)
 
     @classmethod
     def get_gdal_merge_command(cls):
-        """ Void method to return gdal merge shell command.
+        """ Void method to get gdal merge shell command.
         docs in https://gdal.org/programs/gdal_merge.html
 
         Returns:
@@ -90,23 +86,17 @@ class Composer:
             type_name=type_name
         )
 
+        quiet_param = '-q'
+
         if not quiet:
             print('-- Creating file composition to {}'.format(file_path))
             quiet_param = ''
-        else:
-            quiet_param = '-q'
 
         command = Composer.get_gdal_merge_command()
         command = command.format(quiet=quiet, output_path=file_path)
         command += " ".join(map(str, ordered_filelist]))
 
-        try:
-            processed_image= process = Utils._subprocess(command)
-        except subprocess.CalledProcessError as exc:
-            logger.error(
-                'Error while executing gdal_constrast_stretch process.'
-                'Input file: {}. Exception: {}.'.format(input_file, exc))
-            raise
+        Utils._subprocess(command)
 
         is_valid=Utils.validate_image_bands(file_path, ordered_filelist)
 

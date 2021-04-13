@@ -8,8 +8,6 @@ import subprocess
 import shutil
 import tempfile
 
-from datetime import datetime
-
 try:
     from osgeo import gdal
 except ImportError as error:
@@ -139,13 +137,13 @@ class Utils:
             bool: image validation
         """
 
-        if not os.path.isfile(image):
+        if not os.path.isfile(image_path):
             return False
 
         try:
-            ds = gdal.Open(image)
+            ds = gdal.Open(image_path)
         except Exception as exc:
             print(exc)
             return False
 
-        return ds.RasterCount == len(data)
+        return ds.RasterCount == len(filelist)

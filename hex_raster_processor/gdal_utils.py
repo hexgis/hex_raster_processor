@@ -4,12 +4,15 @@
 import os
 import subprocess
 import tempfile
+import logging
 
 from osgeo import ogr, osr
 
 from .composer import Composer
 from .utils import Utils
 from .gdal_datasets import GdalDatasets
+
+logger = logging.getLogger()
 
 
 class GdalUtils(GdalDatasets):
@@ -26,9 +29,9 @@ class GdalUtils(GdalDatasets):
         scale: bool = True,
         quiet: bool = True
     ):
-        """Returns a gdal translate command to resize the image.
-
-        Check https://gdal.org/programs/gdal_translate.html for more details.
+        """
+        Returns a gdal translate command to resize image.
+        Check https://gdal.org/programs/gdal_translate.html for more details
 
         Arguments:
             scale (bool, optional): scale image
@@ -42,10 +45,10 @@ class GdalUtils(GdalDatasets):
             ' -of {img_format} {input_path} {output_path}'
 
         if scale:
-            command = command + ' -scale'
+            command += ' -scale '
 
         if quiet:
-            command = command + ' -q'
+            command += ' -q '
 
         return command
 
@@ -84,8 +87,8 @@ class GdalUtils(GdalDatasets):
                 bands=bands
             )
         except Exception as exc:
-            print('Error at GdalUtils create_compositon_thumbs '
-                  'for {} with exception: {}'.format(ordered_filelist, exc))
+            logger.log('Error at GdalUtils create_compositon_thumbs ' +
+                       'for {} with exception: {}'.format(ordered_images, exc))
             raise
 
         return composition['path'], temp_file.name
@@ -124,7 +127,7 @@ class GdalUtils(GdalDatasets):
                 quiet=quiet, scale=scale
             )
             command = command.format(
-                input=input_image,
+                input_path=input_image,
                 img_format=img_format,
                 output_path=output_path,
                 x=size[0],
@@ -183,7 +186,7 @@ class GdalUtils(GdalDatasets):
                 prefix='cmp', suffix='.tif'
             )
             thumbs_command = command.format(
-                input=img,
+                input_path=img,
                 img_format="GTiff",
                 output_path=temp_files[img].name,
                 x=size[0],
@@ -317,7 +320,7 @@ class GdalUtils(GdalDatasets):
 
         command = GdalUtils.get_gdal_dem_color_command()
         command = command.format(
-            input=input_image,
+            input_path=input_image,
             color_text=color_text_file,
             output_path=temp_file.name
         )

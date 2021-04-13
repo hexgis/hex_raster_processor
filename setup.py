@@ -10,11 +10,11 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ ]
+requirements = ['gdal>=2.4', ]
 
-setup_requirements = ['pytest-runner', ]
+setup_requirements = ['pytest-runner', 'gdal>=2.4', ]
 
-test_requirements = ['pytest>=3', ]
+test_requirements = ['pytest>=3', 'homura>=0.1.5', ]
 
 setup(
     author="Hex Informatica",
@@ -43,7 +43,13 @@ setup(
     include_package_data=True,
     keywords='hex_raster_processor',
     name='hex_raster_processor',
-    packages=find_packages(include=['hex_raster_processor', 'hex_raster_processor.*']),
+    packages=find_packages(
+        include=[
+            'hex_raster_processor',
+            'hex_raster_processor.*',
+            'hex_raster_processor/tilers-tools'
+        ]
+    ),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
