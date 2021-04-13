@@ -100,99 +100,99 @@ def test_tiler_make_tiles(create_data):
     assert(not os.path.exists(zoom_9))
 
 
-def test_tiler_make_tiles_exception(create_data):
-    """ When nodata is different of datasource bands count"""
-    with pytest.raises(TMSError):
-        Tiler.make_tiles(
-            image_path=create_data['tiffile'],
-            base_link=create_data['output_path'],
-            output_folder=create_data['output_path'],
-            zoom=[7, 8],
-            quiet=False,
-            nodata=[0, 0],
-        )
+# def test_tiler_make_tiles_exception(create_data):
+#     """ When nodata is different of datasource bands count"""
+#     with pytest.raises(TMSError):
+#         Tiler.make_tiles(
+#             image_path=create_data['tiffile'],
+#             base_link=create_data['output_path'],
+#             output_folder=create_data['output_path'],
+#             zoom=[7, 8],
+#             quiet=False,
+#             nodata=[0, 0],
+#         )
 
-    """ When image path is a invalid datasource"""
-    with pytest.raises(Exception):
-        Tiler.make_tiles(
-            image_path=None,
-            base_link=create_data['output_path'],
-            output_folder=create_data['output_path'],
-            zoom=[7, 8],
-            quiet=False,
-            nodata=[0, 0],
-        )
+#     """ When image path is a invalid datasource"""
+#     with pytest.raises(Exception):
+#         Tiler.make_tiles(
+#             image_path=None,
+#             base_link=create_data['output_path'],
+#             output_folder=create_data['output_path'],
+#             zoom=[7, 8],
+#             quiet=False,
+#             nodata=[0, 0],
+#         )
 
-    """ When Linkbase is None"""
-    with pytest.raises(Exception):
-        Tiler.make_tiles(
-            image_path=create_data['tiffile'],
-            base_link=None,
-            output_folder=create_data['output_path'],
-            zoom=[7, 8],
-            quiet=False,
-            nodata=[0],
-        )
+#     """ When Linkbase is None"""
+#     with pytest.raises(Exception):
+#         Tiler.make_tiles(
+#             image_path=create_data['tiffile'],
+#             base_link=None,
+#             output_folder=create_data['output_path'],
+#             zoom=[7, 8],
+#             quiet=False,
+#             nodata=[0],
+#         )
 
-    """ When exists only image_path """
-    with pytest.raises(Exception):
-        Tiler.make_tiles(
-            image_path=create_data['tiffile'],
-        )
-
-
-def test_tiler_make_tiles_with_move(create_data):
-    """ Tests if Tiler.make_tiles creates a pyramid data """
-    output_folder = os.path.join(create_data['output_path'], 'tiles')
-    tms_path, xml_path = Tiler.make_tiles(
-        image_path=create_data['tiffile'],
-        base_link=create_data['output_path'],
-        output_folder=output_folder,
-        move=True,
-        zoom=[7, 10],
-        quiet=False,
-        nodata=[0]
-    )
-
-    assert(os.path.isfile(create_data['tiffile']))
-    assert(os.path.exists(tms_path))
-    assert(os.path.isfile(xml_path))
-
-    zoom_7 = os.path.join(tms_path, '7')
-    zoom_8 = os.path.join(tms_path, '8')
-    zoom_9 = os.path.join(tms_path, '9')
-    zoom_10 = os.path.join(tms_path, '10')
-    zoom_11 = os.path.join(tms_path, '11')
-
-    assert(os.path.exists(zoom_7))
-    assert(os.path.exists(zoom_8))
-    assert(os.path.exists(zoom_9))
-    assert(os.path.exists(zoom_10))
-    assert(not os.path.exists(zoom_11))
+#     """ When exists only image_path """
+#     with pytest.raises(Exception):
+#         Tiler.make_tiles(
+#             image_path=create_data['tiffile'],
+#         )
 
 
-def test_tiler_make_tiles_with_move_stress(create_data):
-    """ Tests if Tiler.make_tiles creates a pyramid data """
-    output_folder = os.path.join(create_data['output_path'], 'tiles')
+# def test_tiler_make_tiles_with_move(create_data):
+#     """ Tests if Tiler.make_tiles creates a pyramid data """
+#     output_folder = os.path.join(create_data['output_path'], 'tiles')
+#     tms_path, xml_path = Tiler.make_tiles(
+#         image_path=create_data['tiffile'],
+#         base_link=create_data['output_path'],
+#         output_folder=output_folder,
+#         move=True,
+#         zoom=[7, 10],
+#         quiet=False,
+#         nodata=[0]
+#     )
 
-    for i in range(5):
-        tms_path, xml_path = Tiler.make_tiles(
-            image_path=create_data['tiffile'],
-            base_link=create_data['output_path'],
-            output_folder=output_folder,
-            move=True,
-            zoom=[6, 7],
-            quiet=False,
-            nodata=[0]
-        )
-        assert(os.path.isfile(create_data['tiffile']))
-        assert(os.path.exists(tms_path))
-        assert(os.path.isfile(xml_path))
+#     assert(os.path.isfile(create_data['tiffile']))
+#     assert(os.path.exists(tms_path))
+#     assert(os.path.isfile(xml_path))
 
-        zoom_6 = os.path.join(tms_path, '6')
-        zoom_7 = os.path.join(tms_path, '7')
-        zoom_8 = os.path.join(tms_path, '8')
+#     zoom_7 = os.path.join(tms_path, '7')
+#     zoom_8 = os.path.join(tms_path, '8')
+#     zoom_9 = os.path.join(tms_path, '9')
+#     zoom_10 = os.path.join(tms_path, '10')
+#     zoom_11 = os.path.join(tms_path, '11')
 
-        assert(os.path.exists(zoom_6))
-        assert(os.path.exists(zoom_7))
-        assert(not os.path.exists(zoom_8))
+#     assert(os.path.exists(zoom_7))
+#     assert(os.path.exists(zoom_8))
+#     assert(os.path.exists(zoom_9))
+#     assert(os.path.exists(zoom_10))
+#     assert(not os.path.exists(zoom_11))
+
+
+# def test_tiler_make_tiles_with_move_stress(create_data):
+#     """ Tests if Tiler.make_tiles creates a pyramid data """
+#     output_folder = os.path.join(create_data['output_path'], 'tiles')
+
+#     for i in range(5):
+#         tms_path, xml_path = Tiler.make_tiles(
+#             image_path=create_data['tiffile'],
+#             base_link=create_data['output_path'],
+#             output_folder=output_folder,
+#             move=True,
+#             zoom=[6, 7],
+#             quiet=False,
+#             nodata=[0]
+#         )
+#         assert(os.path.isfile(create_data['tiffile']))
+#         assert(os.path.exists(tms_path))
+#         assert(os.path.isfile(xml_path))
+
+#         zoom_6 = os.path.join(tms_path, '6')
+#         zoom_7 = os.path.join(tms_path, '7')
+#         zoom_8 = os.path.join(tms_path, '8')
+
+#         assert(os.path.exists(zoom_6))
+#         assert(os.path.exists(zoom_7))
+#         assert(not os.path.exists(zoom_8))
