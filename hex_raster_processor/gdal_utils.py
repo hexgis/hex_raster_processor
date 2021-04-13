@@ -217,14 +217,6 @@ class GdalUtils(GdalDatasets):
         """
         Generates footprint for input tif image in WKT format
 
-        Arguments:
-            image_filename (str): 
-            simplifly (float): 
-            output_type (str): 
-
-        Returns:
-            geom (str): parsed geometry
-
         Args:
             image_filename (str): path to file.
             simplify (float): number of distance tolerance for geometry
