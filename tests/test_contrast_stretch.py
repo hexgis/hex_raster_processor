@@ -30,7 +30,7 @@ def download_file(
 def downloaded_file():
     download_url = 'https://storage.googleapis.com/xskylab-data/data/' + \
         'application-tests/image_test.TIF'
-    return download_file(download_url)
+    return download_file(download_url=download_url)
 
 
 def test_contrast_stretch_command(downloaded_file):
