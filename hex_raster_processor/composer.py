@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 import logging
 
@@ -25,14 +28,15 @@ class Composer:
             output_path (str): output path name
             type_name (str): output type for image.
                 E.g.: r6g5b4, r11g8b4
+
         Returns:
             str: output_path joined with type name
         """
 
-        if (filename.endswith(".TIF") or
-            filename.endswith(".tif") or
-            filename.endswith(".tiff") or
-                filename.endswith(".TIFF")):
+        if filename.endswith(".TIF") or
+           filename.endswith(".tif") or
+           filename.endswith(".tiff") or
+           filename.endswith(".TIFF"):
             file_path = os.path.join(output_path, filename)
         else:
             file_path = os.path.join(
@@ -44,7 +48,7 @@ class Composer:
 
     @classmethod
     def get_gdal_merge_command(cls):
-        """ Void metho to get gdal merge shell command.
+        """ Void method to return gdal merge shell command.
         docs in https://gdal.org/programs/gdal_merge.html
 
         Returns:
@@ -61,7 +65,7 @@ class Composer:
         bands: list,
         quiet: bool = True
     ):
-        """Creates image composition using gdal_merge.py with ordered filelist.
+        """Creates image composition using gdal merge with ordered filelist.
         docs available in https://gdal.org/programs/gdal_merge.html
 
         Args:
@@ -80,35 +84,35 @@ class Composer:
 
         type_name = "r{0}g{1}b{2}".format(*bands)
 
-        filepath = Composer.get_image_output_path(
+        file_path = Composer.get_image_output_path(
             filename=filename,
             output_path=output_path,
             type_name=type_name
         )
 
         if not quiet:
-            print('-- Creating file composition to {}'.format(filepath))
+            print('-- Creating file composition to {}'.format(file_path))
             quiet_param = ''
         else:
             quiet_param = '-q'
 
-        command = Composer.get_gdal_merge_command().format(
-            quiet=quiet, output_path=filepath)
+        command = Composer.get_gdal_merge_command()
+        command = command.format(quiet=quiet, output_path=file_path)
         command += " ".join(map(str, ordered_filelist]))
 
         try:
-            processed_image = process = Utils._subprocess(command)
+            processed_image= process = Utils._subprocess(command)
         except subprocess.CalledProcessError as exc:
             logger.error(
                 'Error while executing gdal_constrast_stretch process.'
                 'Input file: {}. Exception: {}.'.format(input_file, exc))
             raise
 
-        is_valid=Utils.validate_image_bands(filepath, ordered_filelist)
+        is_valid=Utils.validate_image_bands(file_path, ordered_filelist)
 
         if is_valid:
             return {
-                "name": filepath.split("/")[-1],
-                "path": filepath,
+                "name": file_path.split("/")[-1],
+                "path": file_path,
                 "type": type_name
             }
