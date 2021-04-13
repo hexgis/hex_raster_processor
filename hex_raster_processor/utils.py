@@ -106,20 +106,22 @@ class Utils:
         return dir_name
 
     @staticmethod
-    def check_creation_folder(folder):
+    def check_creation_folder(directory):
         """
-        Check whether a folder exists, if not the folder is created.
+        Check whether a directory exists, if not the will be created.
 
         Arguments:
-            * folder: path of folder
+            directory (str): directory path
 
         Returns:
-            * Always return folder_path.
+            str: path to directory.
         """
-        if not os.path.exists(folder):
-            os.makedirs(folder)
+        if not os.path.exists(directory):
+            os.makedirs(directory, check_exists=True)
 
-        return folder
+        if os.path.isdir(directory):
+            print("\n\nIs a directory\n\n")
+            return directory
 
     @staticmethod
     def validate_image_bands(image_path: str, filelist: list):
