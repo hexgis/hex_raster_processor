@@ -16,11 +16,11 @@ class GdalDatasets:
     def get_color_text_file(cls, image_type="NDVI"):
         """
         Creates tempfile with color_text file data
-        Check http://www.gdal.org/gdaldem.html for more details
+        Check http://www.gdal.org/gdaldem.html for more details.
 
         Arguments:
             img_type (str, optional): type of image to get text file.
-                Must be in ["NDVI", "NDWI", "NBR", "NDMI", "NDSI", "NPCRI"]
+                Must be in ['NDVI', 'NDWI', 'NBR', 'NDMI', 'NDSI', 'NPCRI'].
 
         Returns:
             str: path to temporary file

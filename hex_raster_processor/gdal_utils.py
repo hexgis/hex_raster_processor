@@ -31,15 +31,15 @@ class GdalUtils(GdalDatasets):
     ):
         """
         Returns a gdal translate command to resize image.
-        Check https://gdal.org/programs/gdal_translate.html for more details
+        Check https://gdal.org/programs/gdal_translate.html for more details.
 
         Arguments:
-            scale (bool, optional): scale image
-            quiet (bool, optional): show logs
+            scale (bool, optional): scale image. Defaults to True.
+            quiet (bool, optional): show logs. Defaults to True.
 
         Returns:
-            str: gdal translate shell command with string parameters
-                Parameters: x, y, img_format, input_path and output_path
+            str: gdal translate shell command with string parameters.
+                Parameters: x, y, img_format, input_path and output_path.
         """
         command = 'gdal_translate -ot Byte -outsize {x}% {y}%' \
             ' -of {img_format} {input_path} {output_path}'
@@ -70,10 +70,10 @@ class GdalUtils(GdalDatasets):
         """Creates a temporary preview for selected composition.
 
         Arguments:
-            ordered_filelist (list): ordered image list for composition
+            ordered_filelist (list): ordered image list for composition.
 
         Returns:
-            tuple: path to created preview, temporary filename
+            tuple: path to created preview, temporary filename.
         """
         temp_file = tempfile.NamedTemporaryFile(suffix='.tif', delete=False)
         output_path = tempfile.TemporaryDirectory()
@@ -106,8 +106,8 @@ class GdalUtils(GdalDatasets):
         using gdal_translate shell command.
 
         Args:
-            input_image (str):  input file path
-            output_path (str): output_path filename in jpg format
+            input_image (str):  input file path.
+            output_path (str): output_path filename in jpg format.
             size (list, optional): list of sizes in % X% Y%. Default: [5, 5].
                 Defaults to [15, 15].
             img_format (str, optional): output_path format. Defaults to 'JPEG'.
@@ -119,7 +119,7 @@ class GdalUtils(GdalDatasets):
             ValueError: error while creating thumbs.
 
         Returns:
-            str: path to created preview
+            str: path to created preview.
         """
         try:
             assert os.path.exists(input_image)
@@ -164,15 +164,15 @@ class GdalUtils(GdalDatasets):
         Creates a composition using Composer from raster_processor.
 
         Args:
-            ordered_images (list): ordered image list for composition
-            output_path (str): output_path filename in jpg format
+            ordered_images (list): ordered image list for composition.
+            output_path (str): output_path filename in jpg format.
             size (list, optional): list of sizes in % X% Y%.
                 Defaults to [100, 100].
             scale (bool, optional): scale image. Defaults to True.
             quiet (bool, optional): show logs. Defaults to True.
 
         Returns:
-            str: path to created preview
+            str: path to created preview.
         """
         files = []
         temp_files = dict()
@@ -215,7 +215,7 @@ class GdalUtils(GdalDatasets):
         EPSG: int = 4674
     ):
         """
-        Generates footprint for input tif image in WKT format
+        Generates footprint for input tif image in WKT format.
 
         Args:
             image_filename (str): path to file.

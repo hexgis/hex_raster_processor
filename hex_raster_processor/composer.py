@@ -24,22 +24,22 @@ class Composer:
         """Returns output path for image composition.
 
         Args:
-            filename (str): input filename
-            output_path (str): output path name
+            filename (str): input filename.
+            output_path (str): output path name.
             type_name (str): output type for image.
-                E.g.: r6g5b4, r11g8b4
+                E.g.: r6g5b4, r11g8b4.
 
         Returns:
-            str: output_path joined with type name
+            str: output_path joined with type name.
         """
 
-        if filename.endswith(".TIF") or \
-           filename.endswith(".tif") or \
-           filename.endswith(".tiff") or \
-           filename.endswith(".TIFF"):
+        if filename.endswith('.TIF') or \
+           filename.endswith('.tif') or \
+           filename.endswith('.tiff') or \
+           filename.endswith('.TIFF'):
             return os.path.join(output_path, filename)
 
-        filename = "{}_{}.TIF".format(filename, type_name)
+        filename = '{}_{}.TIF'.format(filename, type_name)
         return os.path.join(output_path, filename)
 
     @classmethod
@@ -48,7 +48,7 @@ class Composer:
         docs in https://gdal.org/programs/gdal_merge.html
 
         Returns:
-            str: shell command
+            str: shell command.
         """
         return 'gdal_merge.py {quiet} -separate -co PHOTOMETRIC=RGB ' + \
             '-o {output_path} '
@@ -78,7 +78,7 @@ class Composer:
             str: output path for merged image
         """
 
-        type_name = "r{0}g{1}b{2}".format(*bands)
+        type_name = 'r{0}g{1}b{2}'.format(*bands)
 
         file_path = Composer.get_image_output_path(
             filename=filename,
@@ -94,7 +94,7 @@ class Composer:
 
         command = Composer.get_gdal_merge_command()
         command = command.format(quiet=quiet, output_path=file_path)
-        command += " ".join(map(str, ordered_filelist))
+        command += ' '.join(map(str, ordered_filelist))
 
         Utils._subprocess(command)
 
@@ -102,7 +102,7 @@ class Composer:
 
         if is_valid:
             return {
-                "name": file_path.split("/")[-1],
-                "path": file_path,
-                "type": type_name
+                'name': file_path.split('/')[-1],
+                'path': file_path,
+                'type': type_name
             }
