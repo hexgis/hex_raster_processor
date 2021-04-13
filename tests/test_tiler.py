@@ -32,14 +32,14 @@ def create_data(get_default_data):
     download_images(bands=[4])
 
     tiffile = os.path.join(output_dir, product + "_B4.TIF")
-    out_path = os.path.join(output_dir, 'tms')
-    out_path_check = os.path.join(out_path, product + "_B4.tms")
+    output_path = os.path.join(output_dir, 'tms')
+    output_path_check = os.path.join(output_path, product + "_B4.tms")
 
     return {
         "zoom": 7,
         "tiffile": tiffile,
-        "out_path": out_path,
-        "out_path_check": out_path_check
+        "output_path": output_path,
+        "output_path_check": output_path_check
     }
 
 
@@ -52,34 +52,34 @@ def test_call_gdal_tiler(create_data):
 
     zoom = 7
     cmd = 'gdal_tiler.py -p tms --src-nodata 0 --zoom={} -t {} {}'.format(
-        zoom, create_data['out_path'], create_data['tiffile'])
+        zoom, create_data['output_path'], create_data['tiffile'])
     subprocess.call(cmd, shell=True)
 
-    assert(os.path.exists(create_data['out_path']))
-    assert(os.path.exists(create_data['out_path_check']))
+    assert(os.path.exists(create_data['output_path']))
+    assert(os.path.exists(create_data['output_path_check']))
 
-    output_path = os.path.join(create_data['out_path_check'], '7')
+    output_path = os.path.join(create_data['output_path_check'], '7')
     assert(os.path.exists(output_path))
 
-    output_path = os.path.join(create_data['out_path_check'], '8')
+    output_path = os.path.join(create_data['output_path_check'], '8')
     assert(not os.path.exists(output_path))
 
     cmd = 'gdal_tiler.py -p tms --src-nodata 0 --zoom=7:8 -t {} {}'.format(
-        create_data['out_path'], create_data['tiffile']),
+        create_data['output_path'], create_data['tiffile']),
     subprocess.call(cmd, shell=True)
 
-    output_path = os.path.join(create_data['out_path_check'], '8')
+    output_path = os.path.join(create_data['output_path_check'], '8')
     assert(os.path.exists(output_path))
-    shutil.rmtree(create_data['out_path_check'])
+    shutil.rmtree(create_data['output_path_check'])
 
 
-def test_tiler_make_tiles(create_data, ):
+def test_tiler_make_tiles(create_data):
     """ Tests if Tiler.make_tiles creates a pyramid data """
 
     data = Tiler.make_tiles(
         image_path=create_data['tiffile'],
-        base_link=create_data['out_path'],
-        output_folder=create_data['out_path'],
+        base_link=create_data['output_path'],
+        output_folder=create_data['output_path'],
         zoom=[7, 8],
         quiet=False,
         nodata=[0]
@@ -87,7 +87,7 @@ def test_tiler_make_tiles(create_data, ):
 
     assert(os.path.isfile(create_data['tiffile']))
     assert(len(data) == 2)
-    assert(data[0] == create_data['out_path_check'])
+    assert(data[0] == create_data['output_path_check'])
     assert(os.path.exists(data[0]))
     assert(os.path.isfile(data[1]))
 
@@ -105,8 +105,8 @@ def test_tiler_make_tiles_exception(create_data):
     with pytest.raises(TMSError):
         Tiler.make_tiles(
             image_path=create_data['tiffile'],
-            base_link=create_data['out_path'],
-            output_folder=create_data['out_path'],
+            base_link=create_data['output_path'],
+            output_folder=create_data['output_path'],
             zoom=[7, 8],
             quiet=False,
             nodata=[0, 0],
@@ -116,8 +116,8 @@ def test_tiler_make_tiles_exception(create_data):
     with pytest.raises(Exception):
         Tiler.make_tiles(
             image_path=None,
-            base_link=create_data['out_path'],
-            output_folder=create_data['out_path'],
+            base_link=create_data['output_path'],
+            output_folder=create_data['output_path'],
             zoom=[7, 8],
             quiet=False,
             nodata=[0, 0],
@@ -128,7 +128,7 @@ def test_tiler_make_tiles_exception(create_data):
         Tiler.make_tiles(
             image_path=create_data['tiffile'],
             base_link=None,
-            output_folder=create_data['out_path'],
+            output_folder=create_data['output_path'],
             zoom=[7, 8],
             quiet=False,
             nodata=[0],
@@ -143,10 +143,10 @@ def test_tiler_make_tiles_exception(create_data):
 
 def test_tiler_make_tiles_with_move(create_data):
     """ Tests if Tiler.make_tiles creates a pyramid data """
-    output_folder = os.path.join(create_data['out_path'], 'tiles')
+    output_folder = os.path.join(create_data['output_path'], 'tiles')
     tms_path, xml_path = Tiler.make_tiles(
         image_path=create_data['tiffile'],
-        base_link=create_data['out_path'],
+        base_link=create_data['output_path'],
         output_folder=output_folder,
         move=True,
         zoom=[7, 10],
@@ -173,12 +173,12 @@ def test_tiler_make_tiles_with_move(create_data):
 
 def test_tiler_make_tiles_with_move_stress(create_data):
     """ Tests if Tiler.make_tiles creates a pyramid data """
-    output_folder = os.path.join(create_data['out_path'], 'tiles')
+    output_folder = os.path.join(create_data['output_path'], 'tiles')
 
     for i in range(5):
         tms_path, xml_path = Tiler.make_tiles(
             image_path=create_data['tiffile'],
-            base_link=create_data['out_path'],
+            base_link=create_data['output_path'],
             output_folder=output_folder,
             move=True,
             zoom=[6, 7],
