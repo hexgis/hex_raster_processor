@@ -38,4 +38,4 @@ workflows:
       - build-and-test:
         filters:
           branches:
-            only: feature/image_process
+            only: main
