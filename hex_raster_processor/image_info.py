@@ -2,6 +2,8 @@
 
 import os
 
+from .utils import Utils
+
 
 class Image:
     """Class for hex_raster_processor.Image.
@@ -22,15 +24,20 @@ class Image:
         """
         self.image_path = os.path.abspath(image_path)
         self.image_dir = os.path.dirname(self.image_path)
-        self.image_name = os.path.basename(self.image_path).split(".")[0]
+        self.image_basename = os.path.basename(self.image_path)
+        self.image_name = self.image_basename.split(".")[0]
+
+    def get_tempfile(self):
+        """ Returns temporary directory with Image.image_basename """
+        return os.path.join(Utils.create_tempdir(), self.image_basename)
 
     def remove_file(self):
-        """ Removes file from system files. """
+        """ Removes Image.image_path from system files. """
         os.remove(self.image_path)
 
     def rename_file(self, new_filename: str):
         """
-        Renames file using os.rename method.
+        Renames Image.image_path using os.rename method to `new_filename`.
 
         Args:
             new_filename (str): filename.
