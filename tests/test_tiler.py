@@ -100,6 +100,36 @@ def test_tiler_make_tiles(create_data):
     assert(not os.path.exists(zoom_9))
 
 
+def test_tiler_make_tiles_with_gdal_contrast(create_data):
+    """Tests if Tiler.make_tiles creates a pyramid data
+    With contrast stretch.
+    """
+
+    data = Tiler.make_tiles(
+        image_path=create_data['tiffile'],
+        base_link=create_data['output_path'],
+        output_folder=create_data['output_path'],
+        zoom=[7, 8],
+        contrast=True,
+        quiet=False,
+        nodata=[0]
+    )
+
+    assert(os.path.isfile(create_data['tiffile']))
+    assert(len(data) == 2)
+    assert(data[0] == create_data['output_path_check'])
+    assert(os.path.exists(data[0]))
+    assert(os.path.isfile(data[1]))
+
+    zoom_7 = os.path.join(data[0], '7')
+    zoom_8 = os.path.join(data[0], '8')
+    zoom_9 = os.path.join(data[0], '9')
+
+    assert(os.path.exists(zoom_7))
+    assert(os.path.exists(zoom_8))
+    assert(not os.path.exists(zoom_9))
+
+
 def test_tiler_make_tiles_exception(create_data):
     """ When nodata is different of datasource bands count"""
     with pytest.raises(TMSError):
