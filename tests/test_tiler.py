@@ -15,6 +15,11 @@ from .test_base import download_images
 
 @pytest.fixture
 def get_default_data():
+    """Returns default data for Tiler tests.
+
+    Returns:
+        dict: object with bands, product, url and output_dir.
+    """
     return {
         "bands": [],
         "product": "LC08_L1TP_221071_20170521_20170526_01_T1",
@@ -25,7 +30,11 @@ def get_default_data():
 
 @pytest.fixture
 def create_data(get_default_data):
-    """ Fixture data (SetUp) """
+    """Fixture data (SetUp).
+
+    Returns:
+        dict: object with zoom, tifffile, output_path and output_path_check.
+    """
     output_dir = get_default_data.get("output_dir")
     product = get_default_data.get("product")
 
@@ -44,11 +53,12 @@ def create_data(get_default_data):
 
 
 def test_os_environ_gdal_tiler():
+    """ Test if tilers-tools is present on system environmets. """
     assert('tilers-tools' in os.environ["PATH"])
 
 
 def test_call_gdal_tiler(create_data):
-    """ Tests if gdal_tiler.py is valid and test data creation using it"""
+    """ Tests if gdal_tiler.py is valid and test data creation using it. """
 
     zoom = 7
     cmd = 'gdal_tiler.py -p tms --src-nodata 0 --zoom={} -t {} {}'.format(
@@ -74,7 +84,7 @@ def test_call_gdal_tiler(create_data):
 
 
 def test_tiler_make_tiles(create_data):
-    """ Tests if Tiler.make_tiles creates a pyramid data """
+    """ Tests if Tiler.make_tiles creates a pyramid data. """
 
     data = Tiler.make_tiles(
         image_path=create_data['tiffile'],
@@ -101,10 +111,7 @@ def test_tiler_make_tiles(create_data):
 
 
 def test_tiler_make_tiles_with_gdal_contrast(create_data):
-    """Tests if Tiler.make_tiles creates a pyramid data
-    With contrast stretch.
-    """
-
+    """ Tests if Tiler.make_tiles creates a pyramid data. """
     data = Tiler.make_tiles(
         image_path=create_data['tiffile'],
         base_link=create_data['output_path'],
@@ -131,7 +138,7 @@ def test_tiler_make_tiles_with_gdal_contrast(create_data):
 
 
 def test_tiler_make_tiles_exception(create_data):
-    """ When nodata is different of datasource bands count"""
+    """ When nodata is different of datasource bands count. """
     with pytest.raises(TMSError):
         Tiler.make_tiles(
             image_path=create_data['tiffile'],
@@ -142,7 +149,7 @@ def test_tiler_make_tiles_exception(create_data):
             nodata=[0, 0],
         )
 
-    """ When image path is a invalid datasource"""
+    """ When image path is a invalid datasource. """
     with pytest.raises(Exception):
         Tiler.make_tiles(
             image_path=None,
@@ -153,7 +160,7 @@ def test_tiler_make_tiles_exception(create_data):
             nodata=[0, 0],
         )
 
-    """ When Linkbase is None"""
+    """ When Linkbase is None. """
     with pytest.raises(Exception):
         Tiler.make_tiles(
             image_path=create_data['tiffile'],
@@ -164,7 +171,7 @@ def test_tiler_make_tiles_exception(create_data):
             nodata=[0],
         )
 
-    """ When exists only image_path """
+    """ When exists only image_path. """
     with pytest.raises(Exception):
         Tiler.make_tiles(
             image_path=create_data['tiffile'],
@@ -172,7 +179,7 @@ def test_tiler_make_tiles_exception(create_data):
 
 
 def test_tiler_make_tiles_with_move(create_data):
-    """ Tests if Tiler.make_tiles creates a pyramid data """
+    """ Tests if Tiler.make_tiles creates a pyramid data. """
     output_folder = os.path.join(create_data['output_path'], 'tiles')
     tms_path, xml_path = Tiler.make_tiles(
         image_path=create_data['tiffile'],
@@ -202,7 +209,7 @@ def test_tiler_make_tiles_with_move(create_data):
 
 
 def test_tiler_make_tiles_with_move_stress(create_data):
-    """ Tests if Tiler.make_tiles creates a pyramid data """
+    """ Tests if Tiler.make_tiles creates a pyramid data. """
     output_folder = os.path.join(create_data['output_path'], 'tiles')
 
     for i in range(5):

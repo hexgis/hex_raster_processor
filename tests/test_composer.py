@@ -14,6 +14,11 @@ QUIET = True
 
 @pytest.fixture
 def get_default_data():
+    """Default data for Composer tests.
+
+    Returns:
+        dict: object with bands, product, url and output_dir.
+    """
     return {
         "bands": [],
         "product": "LC08_L1TP_221071_20170521_20170526_01_T1",
@@ -23,7 +28,7 @@ def get_default_data():
 
 
 def test_create_composition_with_downloaded_images(get_default_data):
-    """ Test download create composition with downloaded images """
+    """ Test download and create composition with downloaded images """
 
     product = get_default_data.get("product")
     output_dir = get_default_data.get("output_dir")

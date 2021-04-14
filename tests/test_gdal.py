@@ -17,6 +17,11 @@ QUIET = False
 
 @pytest.fixture
 def get_default_data():
+    """Default fixture data for Image GdalUtils and Utils.
+
+    Returns:
+        dict: object with bands, product, url, output_dir and image_types.
+    """
     return {
         "bands": [],
         "product": "LC08_L1TP_221071_20170521_20170526_01_T1",
@@ -27,7 +32,7 @@ def get_default_data():
 
 
 def test_thumbs_composition_band(get_default_data):
-    """ Test thumbs composition band """
+    """ Test thumbs composition band. """
     downloaded = download_images(bands=[4])
     output_dir = get_default_data.get("output_dir")
     output_path = os.path.join(output_dir, 'thumbs_band.jpeg')
@@ -45,7 +50,7 @@ def test_thumbs_composition_band(get_default_data):
 
 
 def test_thumbs_composition(get_default_data):
-    """ Test thumbs composition """
+    """ Test thumbs composition. """
     downloaded = download_images(bands=[6, 5, 4])
     output_dir = get_default_data.get("output_dir")
     product = get_default_data.get("product")
@@ -86,7 +91,7 @@ def test_thumbs_composition(get_default_data):
 
 
 def test_thumbs_composition_rgb(get_default_data):
-    """ Test thumbs composition rgb """
+    """ Test thumbs composition rgb. """
     output_dir = get_default_data.get("output_dir")
     downloaded = download_images(bands=[6, 5, 4])
     assert(len(downloaded) == 5)  # +BQA and MTL
@@ -100,7 +105,7 @@ def test_thumbs_composition_rgb(get_default_data):
 
 
 def test_generate_footprint(get_default_data):
-    """ Test gdal create thumbs """
+    """ Test gdal create thumbs. """
     downloaded = download_images(bands=[4])
     assert(downloaded)
     footprint = GdalUtils.generate_footprint(downloaded[0], simplify=50)
@@ -109,7 +114,7 @@ def test_generate_footprint(get_default_data):
 
 
 def test_create_text_files(get_default_data):
-    """ Test gdal create text files"""
+    """ Test gdal create text files. """
     for img_type in get_default_data.get("img_types"):
         text_file = GdalUtils.get_color_text_file(img_type)
         assert os.path.exists(text_file)
@@ -117,14 +122,14 @@ def test_create_text_files(get_default_data):
 
 
 def test_gdaldem_command_creation(get_default_data):
-    """ Test gdaldem command creation """
+    """ Test gdaldem command creation. """
     command = GdalUtils.get_gdal_dem_color_command()
     assert command
     assert "gdaldem" in command
 
 
 def test_normalized_thumbs_creation(get_default_data):
-    """ Test normalized thumbs creation """
+    """ Test normalized thumbs creation. """
     product = get_default_data.get("product")
     output_dir = get_default_data.get("output_dir")
 

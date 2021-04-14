@@ -11,6 +11,11 @@ from hex_raster_processor.image_info import Image
 
 @pytest.fixture
 def get_default_data():
+    """Default data fixture for Image tests.
+
+    Returns:
+        dict: object with bands, product, url, output_dir and local_path.
+    """
     local_path = os.path.abspath(os.path.dirname('.'))
     local_path = os.path.join(local_path, 'test_media')
 
@@ -25,7 +30,11 @@ def get_default_data():
 
 @pytest.fixture
 def create_image(get_default_data):
-    """ Fixture to create image data """
+    """ Fixture to create image data.
+
+    Returns:
+        tuple: image1, image2, path1, path2
+    """
     local_path = get_default_data.get("local_path")
     product = get_default_data.get("product")
 
@@ -42,13 +51,13 @@ def create_image(get_default_data):
 
 
 def create_files(dir, file):
-    """ Fixture to create files data """
+    """ Fixture to create files data. """
     subprocess.call('mkdir {} -p '.format(dir), shell=True)
     subprocess.call('touch {} '.format(os.path.join(dir, file)), shell=True)
 
 
 def test_image_info(create_image, get_default_data):
-    """ Fixture to create files data """
+    """ Fixture to create files data. """
     local_path = get_default_data.get("local_path")
     product = get_default_data.get("product")
 
@@ -62,7 +71,7 @@ def test_image_info(create_image, get_default_data):
 
 
 def test_image_rename(create_image, get_default_data):
-    """ Test image rename """
+    """ Test Image rename method. """
     local_path = get_default_data.get("local_path")
 
     data = create_image
@@ -78,7 +87,7 @@ def test_image_rename(create_image, get_default_data):
 
 
 def test_remove_file(create_image):
-    """ Test remove files from Image """
+    """ Test remove files from Image. """
     data = create_image
     assert(os.path.exists(data[0].image_path))
     assert(os.path.exists(data[1].image_path))
@@ -88,3 +97,17 @@ def test_remove_file(create_image):
 
     assert(not os.path.exists(data[0].image_path))
     assert(not os.path.exists(data[1].image_path))
+
+
+def test_create_tempfile(create_image):
+    """ Test Image method to create tempfile. """
+    image_1 = create_image[0]
+    image_2 = create_image[1]
+
+    temp = image_1.get_tempfile()
+    assert not os.path.exists(temp)
+    assert not os.path.isdir(os.path.basename(temp))
+
+    temp = image_2.get_tempfile()
+    assert not os.path.exists(temp)
+    assert not os.path.isdir(os.path.basename(temp))
