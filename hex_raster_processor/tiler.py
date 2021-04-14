@@ -11,6 +11,7 @@ import os
 import json
 import subprocess
 
+from .contrast_stretch import GdalContrastStretch
 from .exceptions import TMSError, XMLError
 from .image_info import Image
 from .utils import Utils
@@ -53,7 +54,7 @@ class Tiler:
                     output_path and input_image.
         """
         return 'gdal_tiler.py {quiet} -p tms --src-nodata {nodata} ' + \
-            '--zoom={min_zoom}:{max_zoom} -t {output_path} {input_image}'
+            '--zoom={min_zoom}:{max_zoom} -t {output_path} {input_file}'
 
     @classmethod
     def _get_gdal_translate_scale_command(cls):
@@ -64,38 +65,38 @@ class Tiler:
                 String parameters: quiet, output_path and input_image.
         """
         return 'gdal_translate {quiet} -ot Byte -scale ' + \
-            '{input_image} {output_path}'
+            '{input_file} {output_path}'
 
     @classmethod
-    def _convert_to_byte_scale(
+    def gdal_translate_byte_and_scale(
         cls,
         input_image: Image,
-        output_folder: str = "tms/",
+        output_path: str = None,
         quiet: bool = True
     ):
         """Translates raster using -ot Byte using gdal_merge.
 
         Args:
             input_image (Image): `hex_raster_processor.Image` instance.
-            output_folder (str, optional): Output path. Defaults to "tms/".
+            output_path (str, optional): Output path.
+                If is None, will be created in temporary path.
+                Defaults to None.
             quiet (bool, optional): show logs. Defaults to True.
 
         Returns:
             str: path to converted image.
         """
-
         quiet_param = ''
         if quiet:
             quiet_param = ' -q '
 
-        command = Tiler._get_gdal_translate_scale_command()
-        output_image = '{}.TIF'.format(input_image.image_name)
-        output_image = os.path.join(output_folder, output_image)
-        output_image = Image(output_image)
+        if not output_path:
+            output_path = input_image.get_tempfile()
 
+        command = Tiler._get_gdal_translate_scale_command()
         command = command.format(
-            input_image=input_image.image_path,
-            output_path=output_image.image_path,
+            input_file=input_image.image_path,
+            output_path=output_path,
             quiet=quiet_param
         )
         log = 'Converting image with command:\t {}'.format(command)
@@ -103,9 +104,9 @@ class Tiler:
 
         Utils._subprocess(command)
         Utils._print('Translate finished!', quiet=quiet)
-        return output_image
+        return output_path
 
-    @classmethod
+    @ classmethod
     def create_tms(
         cls,
         image_path: str,
@@ -142,7 +143,7 @@ class Tiler:
             Utils._print(log, quiet=quiet)
             raise TMSError(1, log)
 
-        Utils._print('OK', quiet=quiet)
+        Utils._print('Done!\n', quiet=quiet)
 
         quiet_param = ''
         if quiet:
@@ -152,7 +153,7 @@ class Tiler:
         command = command.format(
             nodata=','.join(map(str, nodata)),
             output_path=output_folder,
-            input_image=image_path,
+            input_file=image_path,
             min_zoom=min(zoom),
             max_zoom=max(zoom),
             quiet=quiet_param,
@@ -199,11 +200,14 @@ class Tiler:
 
         Utils._print('Getting info from image using gdalinfo...', quiet=quiet)
 
+        if base_link.endswith('/'):
+            base_link = os.path.join(base_link, '')
+
         try:
             image_info = Tiler._get_image_info(image_path=image_path)
             upper_left = image_info['cornerCoordinates']['upperLeft']
             lower_right = image_info['cornerCoordinates']['lowerRight']
-            Utils._print('OK', quiet=quiet)
+            Utils._print('Done!\n', quiet=quiet)
         except Exception as exc:
             raise XMLError(1, exc)
 
@@ -259,7 +263,7 @@ class Tiler:
         with open(output_path, 'w') as f:
             f.write(xml_data)
 
-        Utils._print('OK', quiet)
+        Utils._print('Done!\n', quiet)
 
         return filename
 
@@ -267,9 +271,11 @@ class Tiler:
     def make_tiles(
         image_path: str,
         base_link: str,
-        output_folder='tms/',
+        output_folder: str = 'tms/',
         zoom: list = [2, 15],
         nodata: list = [0, 0, 0],
+        contrast: str = True,
+        contrast_range: list = [0.02, 0.98],
         convert: bool = True,
         move: bool = False,
         quiet: bool = True
@@ -288,36 +294,54 @@ class Tiler:
             zoom (list, optional): min and max zoom. Defaults to [2, 15].
             nodata (list, optional): nodata value list. Lenght of nodata
                 and bands list must be same. Defaults to [0, 0, 0].
+            contrast_range (list, optional): list with contrast stretch
+                values to cut image histogram, between 0.0 and 0.1.
+                Defaults to [0.02, 0.98].
             convert (bool, optional): convert image using `-ot Byte` from
                 `gdal_translate`. Defaults to True.
             move (bool, optional): Creates temporary folder to TMS images
                 and move to final when process finishes. Defaults to False.
             quiet (bool, optional): show logs. Defaults to True.
+            contrast (str, optional): apply contrast_range.
+                Must be used with constrast_stretch argument.
+                Defaults to False.
+
+        Raises:
+            TMSError: move process error.
 
         Returns:
             tuple: TMS service name, XML name
-        """
 
+        """
         input_image = Image(image_path)
-        output_folder_name = Utils.check_creation_folder(output_folder)
+
+        if convert:
+            converted_image = Tiler.gdal_translate_byte_and_scale(
+                input_image=input_image,
+                output_path=input_image.get_tempfile(),
+                quiet=quiet
+            )
+            converted_image = Image(converted_image)
+        else:
+            converted_image = input_image
+
+        if contrast:
+            contrasted_image = GdalContrastStretch.get_image(
+                input_file=converted_image.image_path,
+                output_path=converted_image.get_tempfile(),
+                constrast_range=contrast_range
+            )
+            contrasted_image = Image(contrasted_image)
+        else:
+            contrasted_image = converted_image
 
         if move:
             output_folder_name = Utils.create_tempdir()
-
-        converted_image = input_image
-
-        if convert:
-            converted_image = Tiler._convert_to_byte_scale(
-                input_image=input_image,
-                output_folder=output_folder_name,
-                quiet=quiet
-            )
-
-        if not base_link.endswith('/'):
-            base_link = os.path.join(base_link, '')
+        else:
+            output_folder_name = Utils.check_creation_folder(output_folder)
 
         tms = Tiler.create_tms(
-            image_path=converted_image.image_path,
+            image_path=contrasted_image.image_path,
             output_folder=output_folder_name,
             nodata=nodata,
             zoom=zoom,
@@ -325,7 +349,7 @@ class Tiler:
         )
 
         xml = Tiler.create_xml(
-            image_path=converted_image.image_path,
+            image_path=contrasted_image.image_path,
             image=input_image,
             base_link=base_link,
             max_zoom=max(zoom),
