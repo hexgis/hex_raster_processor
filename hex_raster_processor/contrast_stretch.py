@@ -71,7 +71,7 @@ class GdalContrastStretch:
         )
 
         try:
-            processed_image = GdalContrastStretch._run_process(command)
+            GdalContrastStretch._run_process(command)
         except subprocess.CalledProcessError as exc:
             logger.error(
                 'Error while executing gdal_constrast_stretch process.'

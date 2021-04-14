@@ -11,7 +11,8 @@ logger = logging.getLogger()
 
 class Composer:
     """
-    Processes and creates image compositions using gdal from https://gdal.org/.
+    Processes and creates image compositions using gdal
+    from https://gdal.org/.
     """
 
     @classmethod
@@ -44,8 +45,8 @@ class Composer:
 
     @classmethod
     def get_gdal_merge_command(cls):
-        """ Void method to get gdal merge shell command.
-        docs in https://gdal.org/programs/gdal_merge.html
+        """Returns gdal merge shell command.
+        docs available on https://gdal.org/programs/gdal_merge.html.
 
         Returns:
             str: shell command.
@@ -62,7 +63,7 @@ class Composer:
         quiet: bool = True
     ):
         """Creates image composition using gdal merge with ordered filelist.
-        docs available in https://gdal.org/programs/gdal_merge.html
+        docs available on https://gdal.org/programs/gdal_merge.html.
 
         Args:
             filename (str): output name for file.
@@ -86,14 +87,16 @@ class Composer:
             type_name=type_name
         )
 
-        quiet_param = '-q'
+        quiet_param = ''
 
-        if not quiet:
-            print('-- Creating file composition to {}'.format(file_path))
-            quiet_param = ''
+        if quiet:
+            quiet_param = ' -q '
+            log = 'Creating file composition from {} to {}'.format(
+                filename, file_path)
+            Utils._print(log, quiet=quiet)
 
         command = Composer.get_gdal_merge_command()
-        command = command.format(quiet=quiet, output_path=file_path)
+        command = command.format(quiet=quiet_param, output_path=file_path)
         command += ' '.join(map(str, ordered_filelist))
 
         Utils._subprocess(command)

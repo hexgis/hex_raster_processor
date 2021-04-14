@@ -87,8 +87,10 @@ class GdalUtils(GdalDatasets):
                 bands=bands
             )
         except Exception as exc:
-            logger.log('Error at GdalUtils create_compositon_thumbs ' +
-                       'for {} with exception: {}'.format(ordered_images, exc))
+            log = 'Error at GdalUtils create_compositon_thumbs ' + \
+                'for {} with exception: {}'.format(ordered_filelist, exc)
+            logger.exception(log)
+            logger.exception(exc)
             raise
 
         return composition['path'], temp_file.name
@@ -134,24 +136,25 @@ class GdalUtils(GdalDatasets):
                 y=size[1]
             )
             subprocess.call(command, shell=True)
-        except AssertionError as exc:
-            print('Input file does not exists '
-                  'Exception at GdalUtils.thumbs with params: '
-                  'input_image={} output_path= {} and size=[{},{}]'.format(
-                      input_image, output_path, size[0], size[1]))
+        except AssertionError:
+            log = 'Input file does not exists. ' + \
+                'Exception at GdalUtils.thumbs with params: ' + \
+                'input_image={} output_path= {} and size=[{},{}]'.format(
+                    input_image, output_path, size[0], size[1])
+            logger.log(log)
             raise
         except Exception as exc:
-            print('Exception at GdalUtils.thumbs with params: '
-                  'input_image={} output_path= {} and size=[{},{}]'.format(
-                      input_image, output_path, size[0], size[1]))
+            log = 'Exception at GdalUtils.thumbs with params: ' + \
+                'input_image={} output_path= {} and size=[{},{}]'.format(
+                    input_image, output_path, size[0], size[1])
+            logger.log(log)
+            logger.log(exc)
             raise
 
         if os.path.exists(output_path):
             return output_path
 
-        return False
-
-    @staticmethod
+    @ staticmethod
     def composition_rgb_thumbs(
         ordered_images: list,
         output_path: str,
@@ -181,10 +184,10 @@ class GdalUtils(GdalDatasets):
         )
 
         for img in ordered_images:
-
             temp_files[img] = tempfile.NamedTemporaryFile(
                 prefix='cmp', suffix='.tif'
             )
+
             thumbs_command = command.format(
                 input_path=img,
                 img_format="GTiff",
@@ -192,6 +195,7 @@ class GdalUtils(GdalDatasets):
                 x=size[0],
                 y=size[1],
             )
+
             subprocess.call(thumbs_command, shell=True)
 
             if os.path.exists(temp_files[img].name):
@@ -202,12 +206,13 @@ class GdalUtils(GdalDatasets):
         if composition:
             files.append(composition)
             thumbs = GdalUtils.thumbs(
-                input_image=composition, output_path=output_path
+                input_image=composition,
+                output_path=output_path
             )
 
         return thumbs or False
 
-    @staticmethod
+    @ staticmethod
     def generate_footprint(
         image_filename: str,
         simplify: float = 0,
@@ -270,7 +275,7 @@ class GdalUtils(GdalDatasets):
 
         return output_path
 
-    @staticmethod
+    @ staticmethod
     def create_normalized_thumbs(
         input_image: str,
         output_path: str,
@@ -281,11 +286,10 @@ class GdalUtils(GdalDatasets):
         quiet: bool = True
     ):
         """Creates preview for input image in JPEG `img_format`.
-
         Do not use in case of default composition thumbs.
 
         Used only to create normalized thumbs that adds scale parameter
-        to command. 
+        to command.
 
         Args:
             input_image (str): input file path.
