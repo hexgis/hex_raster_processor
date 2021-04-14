@@ -4,7 +4,7 @@ import os
 
 
 class Image:
-    """ Class for hex_raster_processor.Image.
+    """Class for hex_raster_processor.Image.
 
     Used to create default methods to image from image_path as:
         - remove_file: deletes file from system files.
@@ -15,8 +15,7 @@ class Image:
         self._set_image_attributes(image_path)
 
     def _set_image_attributes(self, image_path: str):
-        """
-        Private method to set class Image attributes.
+        """Private method to set class Image attributes.
 
         Args:
             image_path (str): path to file to get path, dir and name.
