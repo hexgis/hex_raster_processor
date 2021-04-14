@@ -7,6 +7,8 @@ services:
     command: >
       bash -c "
       python setup.py develop
+      && flake8 hex_raster_processor/*.py tests
       && pytest"
     volumes:
       - .:/app/
+ 
