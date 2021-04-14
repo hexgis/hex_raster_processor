@@ -106,7 +106,7 @@ class Tiler:
         Utils._print('Translate finished!', quiet=quiet)
         return output_path
 
-    @ classmethod
+    @classmethod
     def create_tms(
         cls,
         image_path: str,
