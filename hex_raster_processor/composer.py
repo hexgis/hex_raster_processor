@@ -10,8 +10,7 @@ logger = logging.getLogger()
 
 
 class Composer:
-    """
-    Processes and creates image compositions using gdal
+    """Processes and creates image compositions using gdal
     from https://gdal.org/.
     """
 
@@ -46,6 +45,7 @@ class Composer:
     @classmethod
     def get_gdal_merge_command(cls):
         """Returns gdal merge shell command.
+
         docs available on https://gdal.org/programs/gdal_merge.html.
 
         Returns:
@@ -63,6 +63,7 @@ class Composer:
         quiet: bool = True
     ):
         """Creates image composition using gdal merge with ordered filelist.
+
         docs available on https://gdal.org/programs/gdal_merge.html.
 
         Args:

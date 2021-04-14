@@ -29,8 +29,8 @@ class GdalUtils(GdalDatasets):
         scale: bool = True,
         quiet: bool = True
     ):
-        """
-        Returns a gdal translate command to resize image.
+        """Returns a gdal translate command to resize image.
+
         Check https://gdal.org/programs/gdal_translate.html for more details.
 
         Arguments:
@@ -54,9 +54,9 @@ class GdalUtils(GdalDatasets):
 
     @classmethod
     def get_gdal_dem_color_command(cls):
-        """Returns a gdaldem command to create a colorized image.
+        """Returns gdaldem command to create a colorized image.
 
-        check http://www.gdal.org/gdaldem.html for more details
+        Check http://www.gdal.org/gdaldem.html for more details
 
         Returns:
             str: gdaldem color-relief shell command with string parameters.
@@ -104,8 +104,9 @@ class GdalUtils(GdalDatasets):
         scale: bool = True,
         quiet: bool = True
     ):
-        """Creates thumbnails for input image in JPEG format
-        using gdal_translate shell command.
+        """Creates thumbnails for input image.
+
+        Uses gdal_translate shell command to create thumbnails.
 
         Args:
             input_image (str):  input file path.
@@ -154,7 +155,7 @@ class GdalUtils(GdalDatasets):
         if os.path.exists(output_path):
             return output_path
 
-    @ staticmethod
+    @staticmethod
     def composition_rgb_thumbs(
         ordered_images: list,
         output_path: str,
@@ -212,15 +213,14 @@ class GdalUtils(GdalDatasets):
 
         return thumbs or False
 
-    @ staticmethod
+    @staticmethod
     def generate_footprint(
         image_filename: str,
         simplify: float = 0,
         output_type: str = 'wkt',
         EPSG: int = 4674
     ):
-        """
-        Generates footprint for input tif image in WKT format.
+        """Generates footprint for input tif image in WKT format.
 
         Args:
             image_filename (str): path to file.
@@ -275,7 +275,7 @@ class GdalUtils(GdalDatasets):
 
         return output_path
 
-    @ staticmethod
+    @staticmethod
     def create_normalized_thumbs(
         input_image: str,
         output_path: str,
@@ -286,8 +286,8 @@ class GdalUtils(GdalDatasets):
         quiet: bool = True
     ):
         """Creates preview for input image in JPEG `img_format`.
-        Do not use in case of default composition thumbs.
 
+        Do not use in case of default composition thumbs.
         Used only to create normalized thumbs that adds scale parameter
         to command.
 

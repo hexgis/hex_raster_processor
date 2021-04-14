@@ -23,7 +23,6 @@ os.environ["PATH"] += ":{}".format(
 
 
 class Tiler:
-
     """Class for tiler data using tiler-tools.
 
     Uses package from https://github.com/vss-devel/tilers-tools
@@ -31,7 +30,7 @@ class Tiler:
 
     @classmethod
     def _get_image_info(cls, image_path: str):
-        """Get image info using `gdalinfo` as json data
+        """Get image info using `gdalinfo` as json data.
 
         Args:
             image_path (str): path to image.
@@ -46,7 +45,7 @@ class Tiler:
 
     @classmethod
     def _get_gdal_tiler_command(cls):
-        """Returns gdal_tiler.py shell command
+        """Returns gdal_tiler.py shell command.
 
         Returns:
             str: tiler shell command with string parameters.
@@ -180,8 +179,9 @@ class Tiler:
         output_folder: str = 'tms/',
         quiet: bool = True
     ):
-        """Generates XML file with link for TMS directory from base_link
-        joined with image tms path.
+        """Generates XML file with link for TMS directory from base_link.
+
+        Join base_link with TMS path to create link to service.
 
         Args:
             image_path (str): path to image.
@@ -192,10 +192,11 @@ class Tiler:
             output_folder (str, optional): output path. Defaults to 'tms/'.
             quiet (bool, optional): show logs. Defaults to True.
 
-        XMLError: image info could not be founded not
+        Raises:
+            XMLError: image info could not be founded not.
 
         Returns:
-            str: output path to xml file
+            str: output path to xml file.
         """
 
         Utils._print('Getting info from image using gdalinfo...', quiet=quiet)
@@ -280,8 +281,8 @@ class Tiler:
         move: bool = False,
         quiet: bool = True
     ):
-        """
-        Generates tiles for input image creating Tile Map Service data.
+        """Generates tiles for input image creating Tile Map Service data.
+
         Uses tilers-tools package from
         dans-gdal-scripts (https://github.com/gina-alaska/dans-gdal-scripts/).
 

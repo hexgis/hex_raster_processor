@@ -6,16 +6,15 @@ import tempfile
 
 
 class GdalDatasets:
-    """
-    Default datasets for GdalDem process.
+    """Default datasets for GdalDem process.
 
     Contains default datasets for gdal processes including color text files.
     """
 
     @classmethod
     def get_color_text_file(cls, image_type="NDVI"):
-        """
-        Creates tempfile with color_text file data
+        """Creates tempfile with color_text file data.
+
         Check http://www.gdal.org/gdaldem.html for more details.
 
         Arguments:

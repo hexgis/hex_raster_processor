@@ -7,14 +7,14 @@ logger = logging.getLogger()
 
 
 class GdalContrastStretch:
-    """Support class to generate contrasted image using
-    dans-gdal-scripts (https://github.com/gina-alaska/dans-gdal-scripts/).
+    """Support class to generate contrasted image.
+
+    Use dans-gdal-scripts (https://github.com/gina-alaska/dans-gdal-scripts/).
     """
 
     @classmethod
     def _get_contrast_command(cls):
-        """
-        Returns contrast stretch shell command.
+        """Returns contrast stretch shell command.
 
         Returns:
             str: gdal_constrast_stretch shell command.
@@ -41,9 +41,10 @@ class GdalContrastStretch:
         constrast_range: list = [0.02, 0.98],
         nodata: int = 0
     ):
-        """
-        Gets constrasted image from input_file using constrast_range and
-        nodatavalue and returns a 8 bit image with cutted histogram.
+        """Gets constrasted image from input_file.
+
+        Uses constrast_range and nodatavalue and returns a 8 bit image
+        with cutted histogram.
 
         Args:
             input_file (str): path to input file.

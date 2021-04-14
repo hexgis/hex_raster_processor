@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" Utils used on raster_processor module """
+""" Utils used on raster_processor module. """
 
 import os
 import subprocess
@@ -21,7 +21,7 @@ class Utils:
 
     @staticmethod
     def _print(msg: str, quiet: bool):
-        """ Used to print messages if quiet is False.
+        """Used to print messages if quiet is False.
 
         Arguments:
             msg (str): message to print.
@@ -32,7 +32,7 @@ class Utils:
 
     @staticmethod
     def _subprocess(command: str):
-        """ Void function to call subprocess run process.
+        """Void function to call subprocess run process.
 
         Arguments:
             command: command for subprocess
@@ -41,8 +41,7 @@ class Utils:
 
     @staticmethod
     def remove_file(input_file: str):
-        """
-        Method to remove input_file from argument
+        """Method to remove input_file from argument.
 
         Arguments:
             input_file (str): input file to remove
@@ -59,8 +58,8 @@ class Utils:
         dest: str,
         src_remove: bool = True
     ):
-        """
-        Void method to move files from source to destiny path arguments.
+        """Void method to move files from source to destiny path arguments.
+
         Uses shutil to move entire directory.
 
         Arguments:
@@ -86,8 +85,7 @@ class Utils:
 
     @staticmethod
     def create_tempdir(dir_name: str = None):
-        """
-        Creates temporary directory using tempfile.
+        """Creates temporary directory using tempfile.
 
         Arguments:
             dir_name (str, optional): name of directory
@@ -107,8 +105,7 @@ class Utils:
 
     @staticmethod
     def check_creation_folder(directory):
-        """
-        Check whether a directory exists, if not the will be created.
+        """Check whether a directory exists, if not the will be created.
 
         Arguments:
             directory (str): directory path
@@ -124,8 +121,7 @@ class Utils:
 
     @staticmethod
     def validate_image_bands(image_path: str, filelist: list):
-        """
-        Check if the image_path exists and check its bands.
+        """Check if the image_path exists and check its bands.
 
         Will check if image_path is a valid datasource
         and number of bands is equals to filelist length.
