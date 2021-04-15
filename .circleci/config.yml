@@ -6,23 +6,23 @@ jobs:
     - image: python:3.9
     steps:
     - checkout
-    - run:
-      name: Install packages for python dev and libgnutls28 dev
-      command: |
-        apt-get install -y python3-setuptools python-distutils
-        apt-get install -y build-essential libgnutls28-dev python3-pip python-dev
-        apt-get install -y python-pil python-gdal libgdal-dev gdal-bin dans-gdal-scripts
-        pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
     - restore_cache:
-      key: deps-{{ .Branch }}-{{ checksum "requirements_dev.txt" }}
+        key: deps-{{ .Branch }}-{{ checksum "requirements_dev.txt" }}
     - run:
-      name: Creating venv and install packages
-      command: |
-        python3 -m venv app_env
-        . app_env/bin/activate
-        pip install numpy
-        pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
-        python setup.py develop
+        name: Install packages for python dev and libgnutls28 dev
+        command: |
+          apt-get install -y python3-setuptools python-distutils
+          apt-get install -y build-essential libgnutls28-dev python3-pip python-dev
+          apt-get install -y python-pil python-gdal libgdal-dev gdal-bin dans-gdal-scripts
+          pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
+    - run:
+        name: Creating venv and install packages
+        command: |
+          python3 -m venv app_env
+          . app_env/bin/activate
+          pip install numpy
+          pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
+          python setup.py develop
     - save_cache:
       key: deps-{{ .Branch }}-{{ checksum "requirements_dev.txt" }}
       paths:
