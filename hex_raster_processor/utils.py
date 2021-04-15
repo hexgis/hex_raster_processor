@@ -115,7 +115,7 @@ class Utils:
         """
         if not os.path.exists(directory) and \
            not os.path.isdir(directory):
-            os.makedirs(directory, check_exists=True)
+            os.makedirs(directory, exist_ok=True)
 
         return directory
 
