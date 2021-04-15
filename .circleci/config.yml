@@ -14,7 +14,6 @@ jobs:
             apt-get update -y 
             apt-get install -y python3-setuptools build-essential libgnutls28-dev python3-pip python-dev
             apt-get install -y python-pil python-gdal libgdal-dev gdal-bin dans-gdal-scripts
-            pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal" --no-input
       - run:
           name: Creating venv and install packages
           command: |
@@ -22,6 +21,7 @@ jobs:
             . app_env/bin/activate
             pip install numpy
             pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
+            pip install --no-cache-dir -r requirements_dev.txt
             python setup.py develop
       - save_cache:
           key: deps-{{ .Branch }}-{{ checksum "requirements_dev.txt" }}
