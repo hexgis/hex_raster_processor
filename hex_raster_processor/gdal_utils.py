@@ -142,14 +142,14 @@ class GdalUtils(GdalDatasets):
                 'Exception at GdalUtils.thumbs with params: ' + \
                 'input_image={} output_path= {} and size=[{},{}]'.format(
                     input_image, output_path, size[0], size[1])
-            logger.log(log)
+            logger.info(log)
             raise
         except Exception as exc:
             log = 'Exception at GdalUtils.thumbs with params: ' + \
                 'input_image={} output_path= {} and size=[{},{}]'.format(
                     input_image, output_path, size[0], size[1])
-            logger.log(log)
-            logger.log(exc)
+            logger.exception(log)
+            logger.exception(exc)
             raise
 
         if os.path.exists(output_path):
