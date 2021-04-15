@@ -3,40 +3,40 @@ version: 2.0
 jobs:
   build-and-test:
     docker:
-    - image: python:3.9
+      - image: python:3.9
     steps:
-    - checkout
-    - restore_cache:
-        key: deps-{{ .Branch }}-{{ checksum "requirements_dev.txt" }}
-    - run:
-        name: Install packages for python dev and libgnutls28 dev
-        command: |
-          apt-get install -y python3-setuptools python-distutils
-          apt-get install -y build-essential libgnutls28-dev python3-pip python-dev
-          apt-get install -y python-pil python-gdal libgdal-dev gdal-bin dans-gdal-scripts
-          pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
-    - run:
-        name: Creating venv and install packages
-        command: |
-          python3 -m venv app_env
-          . app_env/bin/activate
-          pip install numpy
-          pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
-          python setup.py develop
-    - save_cache:
-      key: deps-{{ .Branch }}-{{ checksum "requirements_dev.txt" }}
-      paths:
-        - app_env
-    - run:
-      name: Running tests for apps
-      command: |
-        . app_env/bin/activate
-        flake8 hex_raster_processor/*.py tests
-        pytest -s
+      - checkout
+      - restore_cache:
+          key: deps-{{ .Branch }}-{{ checksum "requirements_dev.txt" }}
+      - run:
+          name: Install packages for python dev and libgnutls28 dev
+          command: |
+            apt-get install -y python3-setuptools python-distutils
+            apt-get install -y build-essential libgnutls28-dev python3-pip python-dev
+            apt-get install -y python-pil python-gdal libgdal-dev gdal-bin dans-gdal-scripts
+            pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal" --no-input
+      - run:
+          name: Creating venv and install packages
+          command: |
+            python3 -m venv app_env
+            . app_env/bin/activate
+            pip install numpy
+            pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
+            python setup.py develop
+      - save_cache:
+          key: deps-{{ .Branch }}-{{ checksum "requirements_dev.txt" }}
+          paths:
+            - app_env
+      - run:
+          name: Running tests for apps
+          command: |
+            . app_env/bin/activate
+            flake8 hex_raster_processor/*.py tests
+            pytest -s
 
 workflows:
   version: 2
-  build:
+  build-and-test:
     jobs:
       - build-and-test:
           filters:
