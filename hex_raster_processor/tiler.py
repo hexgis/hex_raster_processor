@@ -275,7 +275,7 @@ class Tiler:
         output_folder: str = 'tms/',
         zoom: list = [2, 15],
         nodata: list = [0, 0, 0],
-        contrast: str = True,
+        contrast: str = False,
         contrast_range: list = [0.02, 0.98],
         convert: bool = True,
         move: bool = False,
