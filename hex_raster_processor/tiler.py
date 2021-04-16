@@ -50,7 +50,7 @@ class Tiler:
         Returns:
             str: tiler shell command with string parameters.
                 String parameters: quiet, nodata, min_zoom, max_zoom,
-                    output_path and input_image.
+                    output_path and input_file.
         """
         return 'gdal_tiler.py {quiet} -p tms --src-nodata {nodata} ' + \
             '--zoom={min_zoom}:{max_zoom} -t {output_path} {input_file}'
