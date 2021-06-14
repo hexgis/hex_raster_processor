@@ -138,12 +138,12 @@ class Utils:
         """
 
         if not os.path.isfile(datasource):
-            return False
+            raise ValidationBandError(1, 'input file does not exists')
 
         try:
             return gdal.Open(datasource)
         except Exception as exc:
-            raise ValidationBandError(str(exc))
+            raise ValidationBandError(2, str(exc))
 
     @staticmethod
     def validate_image_bands(image_path: str, filelist: list):
@@ -159,10 +159,4 @@ class Utils:
         Returns:
             bool: image validation
         """
-
-        if not os.path.isfile(image_path):
-            return False
-
-        ds = Utils.validate_band(image_path)
-
-        return ds.RasterCount == len(filelist)
+        return Utils.validate_band(image_path).RasterCount == len(filelist)
