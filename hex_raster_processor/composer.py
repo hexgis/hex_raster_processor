@@ -100,6 +100,9 @@ class Composer:
         command = command.format(quiet=quiet_param, output_path=file_path)
         command += ' '.join(map(str, ordered_filelist))
 
+        for band in ordered_filelist:
+            Utils.validate_band(band)
+
         Utils._subprocess(command)
 
         is_valid = Utils.validate_image_bands(file_path, ordered_filelist)
