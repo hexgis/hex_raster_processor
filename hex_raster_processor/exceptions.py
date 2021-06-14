@@ -16,3 +16,11 @@ class XMLError(Exception):
     def __init__(self, code, message):
         super().__init__(message)
         self.message = message
+
+
+class ValidationBandError(Exception):
+    """ Class for Validation band exception. """
+
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.message = message
