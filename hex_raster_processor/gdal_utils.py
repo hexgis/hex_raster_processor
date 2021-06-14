@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import subprocess
 import tempfile
 import logging
 
@@ -136,7 +135,7 @@ class GdalUtils(GdalDatasets):
                 x=size[0],
                 y=size[1]
             )
-            subprocess.call(command, shell=True)
+            Utils._subprocess(command)
         except AssertionError:
             log = 'Input file does not exists. ' + \
                 'Exception at GdalUtils.thumbs with params: ' + \
@@ -197,7 +196,7 @@ class GdalUtils(GdalDatasets):
                 y=size[1],
             )
 
-            subprocess.call(thumbs_command, shell=True)
+            Utils._subprocess(thumbs_command)
 
             if os.path.exists(temp_files[img].name):
                 files.append(temp_files[img].name)
@@ -243,14 +242,14 @@ class GdalUtils(GdalDatasets):
             temp_dir.name,
             next(tempfile._get_candidate_names()) + '.shp')
 
-        subprocess.call('gdalwarp -dstnodata 0 -dstalpha -of GTiff ' +
-                        image_filename + ' ' + temp_1.name, shell=True)
-        subprocess.call('gdal_translate -b mask -of vrt -a_nodata 0 ' +
-                        temp_1.name + ' ' + temp_2.name, shell=True)
-        subprocess.call('gdal_translate -b 1 -of vrt -a_nodata 0 ' +
-                        temp_2.name + ' ' + temp_3.name, shell=True)
-        subprocess.call('gdal_polygonize.py -8 ' + temp_3.name + ' -b 1 ' +
-                        '-f "ESRI Shapefile" ' + footprint_path, shell=True)
+        Utils._subprocess('gdalwarp -dstnodata 0 -dstalpha -of GTiff ' +
+                          image_filename + ' ' + temp_1.name)
+        Utils._subprocess('gdal_translate -b mask -of vrt -a_nodata 0 ' +
+                          temp_1.name + ' ' + temp_2.name)
+        Utils._subprocess('gdal_translate -b 1 -of vrt -a_nodata 0 ' +
+                          temp_2.name + ' ' + temp_3.name)
+        Utils._subprocess('gdal_polygonize.py -8 ' + temp_3.name + ' -b 1 ' +
+                          '-f "ESRI Shapefile" ' + footprint_path)
 
         dataset = ogr.Open(footprint_path)
         layer = dataset.GetLayer()
