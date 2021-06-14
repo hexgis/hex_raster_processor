@@ -8,6 +8,8 @@ import subprocess
 import shutil
 import tempfile
 
+from .exceptions import ValidationBandError
+
 try:
     from osgeo import gdal
 except ImportError as error:
@@ -120,6 +122,30 @@ class Utils:
         return directory
 
     @staticmethod
+    def validate_band(datasource: str):
+        """Check if the datasource exists and check its band.
+
+        Will check if datasource is valid and returns `gdal.Open`.
+
+        Raises:
+            ValidationBandError: error while opening datasource.
+
+        Arguments:
+            datasource (str): image path
+
+        Returns:
+            bool: image validation
+        """
+
+        if not os.path.isfile(datasource):
+            return False
+
+        try:
+            return gdal.Open(datasource)
+        except Exception as exc:
+            raise ValidationBandError(str(exc))
+
+    @staticmethod
     def validate_image_bands(image_path: str, filelist: list):
         """Check if the image_path exists and check its bands.
 
@@ -128,7 +154,7 @@ class Utils:
 
         Arguments:
             image_path (str): image path
-            data (list): images filelist
+            filelist (list): images filelist
 
         Returns:
             bool: image validation
@@ -137,10 +163,6 @@ class Utils:
         if not os.path.isfile(image_path):
             return False
 
-        try:
-            ds = gdal.Open(image_path)
-        except Exception as exc:
-            print(exc)
-            return False
+        ds = Utils.validate_band(image_path)
 
         return ds.RasterCount == len(filelist)
