@@ -75,8 +75,9 @@ class GdalContrastStretch:
             GdalContrastStretch._run_process(command)
         except subprocess.CalledProcessError as exc:
             logger.error(
-                'Error while executing gdal_constrast_stretch process.'
-                'Input file: {}. Exception: {}.'.format(input_file, exc))
+                f'Error while executing gdal_constrast_stretch process.'
+                f'Input file: {input_file}. Exception: {exc}.'
+            )
             raise
 
         return output_path
