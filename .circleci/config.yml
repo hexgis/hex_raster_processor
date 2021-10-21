@@ -3,7 +3,7 @@ version: 2.0
 jobs:
   build-and-test:
     docker:
-      - image: python:3.9
+      - image: python:3.9-buster
     steps:
       - checkout
       - restore_cache:
