@@ -28,11 +28,11 @@ class Image:
         self.image_name = self.image_basename.split(".")[0]
 
     def get_tempfile(self):
-        """ Returns temporary directory with Image.image_basename. """
+        """Returns temporary directory with Image.image_basename."""
         return os.path.join(Utils.create_tempdir(), self.image_basename)
 
     def remove_file(self):
-        """ Removes Image.image_path from system files. """
+        """Removes Image.image_path from system files."""
         os.remove(self.image_path)
 
     def rename_file(self, new_filename: str):

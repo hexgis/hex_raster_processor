@@ -1,31 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" Utils used on raster_processor module. """
+"""Utils used on raster_processor module. """
 
 import os
 import subprocess
 import shutil
 import tempfile
 
-from .exceptions import ValidationBandError
+from . import exceptions
 
 try:
     from osgeo import gdal
 except ImportError as error:
-    print("Error importing GDAL {}".format(error))
+    print(f'Error importing GDAL {error}')
     subprocess.call("python --version", shell=True)
     import gdal
 
 
 class Utils:
-    """ Misc utility methods """
+    """Misc utility methods."""
 
     @staticmethod
-    def _print(msg: str, quiet: bool):
+    def print(msg: str, quiet: bool) -> None:
         """Used to print messages if quiet is False.
 
-        Arguments:
+        Args:
             msg (str): message to print.
             quiet (bool): show logs.
         """
@@ -33,19 +33,19 @@ class Utils:
             print(msg)
 
     @staticmethod
-    def _subprocess(command: str):
+    def subprocess(command: str) -> None:
         """Void function to call subprocess run process.
 
-        Arguments:
+        Args:
             command: command for subprocess
         """
         subprocess.run(command, shell=True, check=True)
 
     @staticmethod
-    def remove_file(input_file: str):
+    def remove_file(input_file: str) -> None:
         """Method to remove input_file from argument.
 
-        Arguments:
+        Args:
             input_file (str): input file to remove
 
         Returns:
@@ -59,12 +59,12 @@ class Utils:
         src: str,
         dest: str,
         src_remove: bool = True
-    ):
+    ) -> None:
         """Void method to move files from source to destiny path arguments.
 
         Uses shutil to move entire directory.
 
-        Arguments:
+        Args:
             src (str): source path
             dest (str): destination path
             src_remove (bool, optional): remove files after copy?
@@ -86,10 +86,10 @@ class Utils:
                 Utils.remove_file(src)
 
     @staticmethod
-    def create_tempdir(dir_name: str = None):
+    def create_tempdir(dir_name: str = None) -> str:
         """Creates temporary directory using tempfile.
 
-        Arguments:
+        Args:
             dir_name (str, optional): name of directory
 
         Returns:
@@ -106,10 +106,10 @@ class Utils:
         return dir_name
 
     @staticmethod
-    def check_creation_folder(directory):
+    def check_creation_folder(directory: str) -> str:
         """Check whether a directory exists, if not the will be created.
 
-        Arguments:
+        Args:
             directory (str): directory path
 
         Returns:
@@ -122,15 +122,15 @@ class Utils:
         return directory
 
     @staticmethod
-    def validate_band(datasource: str):
+    def validate_band(datasource: str) -> bool:
         """Check if the datasource exists and check its band.
 
         Will check if datasource is valid and returns `gdal.Open`.
 
         Raises:
-            ValidationBandError: error while opening datasource.
+            exceptions.ValidationBandError: error while opening datasource.
 
-        Arguments:
+        Args:
             datasource (str): image path
 
         Returns:
@@ -138,12 +138,13 @@ class Utils:
         """
 
         if not os.path.isfile(datasource):
-            raise ValidationBandError(1, 'input file does not exists')
+            raise exceptions.ValidationBandError(
+                1, 'input file does not exists')
 
         try:
             return gdal.Open(datasource)
         except Exception as exc:
-            raise ValidationBandError(2, str(exc))
+            raise exceptions.ValidationBandError(2, str(exc))
 
     @staticmethod
     def validate_image_bands(image_path: str, filelist: list):
@@ -152,7 +153,7 @@ class Utils:
         Will check if image_path is a valid datasource
         and number of bands is equals to filelist length.
 
-        Arguments:
+        Args:
             image_path (str): image path
             filelist (list): images filelist
 

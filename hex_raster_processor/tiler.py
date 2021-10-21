@@ -11,10 +11,10 @@ import os
 import json
 import subprocess
 
-from .contrast_stretch import GdalContrastStretch
-from .exceptions import TMSError, XMLError
-from .image_info import Image
-from .utils import Utils
+from . import exceptions
+from . import contrast_stretch
+from . import image_info
+from . import utils
 
 os.environ["PATH"] += ":{}".format(
     os.path.join(os.path.abspath(
@@ -69,15 +69,16 @@ class Tiler:
     @classmethod
     def gdal_translate_byte_and_scale(
         cls,
-        input_image: Image,
+        input_image: image_info.Image,
         output_path: str = None,
         quiet: bool = True
     ):
         """Translates raster using -ot Byte using gdal_merge.
 
         Args:
-            input_image (Image): `hex_raster_processor.Image` instance.
-            output_path (str, optional): Output path.
+            input_image (image_info.Image):
+                `hex_raster_processor.image_info.Image` instance.
+            output_path (str, optional): Output path to file.
                 If is None, will be created in temporary path.
                 Defaults to None.
             quiet (bool, optional): show logs. Defaults to True.
@@ -99,10 +100,10 @@ class Tiler:
             quiet=quiet_param
         )
         log = 'Converting image with command:\t {}'.format(command)
-        Utils._print(log, quiet)
+        utils.Utils.print(log, quiet)
 
-        Utils._subprocess(command)
-        Utils._print('Translate finished!', quiet=quiet)
+        utils.Utils.subprocess(command)
+        utils.Utils.print('Translate finished!', quiet=quiet)
         return output_path
 
     @classmethod
@@ -127,22 +128,24 @@ class Tiler:
             quiet (bool, optional): show logs.
                 Defaults to True.
 
-        TMSError: for invalid datasource bands.
+        exceptions.TMSError: for invalid datasource bands.
 
         Returns:
             str: output path to directory for processed tiles.
         """
 
         log = 'Validating image and bands with nodata info...'
-        Utils._print(log, quiet=quiet)
+        utils.Utils.print(log, quiet=quiet)
 
-        if not Utils.validate_image_bands(image_path, nodata):
-            log = 'Input image is not a valid datasource, ' + \
+        if not utils.Utils.validate_image_bands(image_path, nodata):
+            log = (
+                'Input image is not a valid datasource, '
                 'nodata length must be same as datasource bands'
-            Utils._print(log, quiet=quiet)
-            raise TMSError(1, log)
+            )
+            utils.Utils.print(log, quiet=quiet)
+            raise exceptions.TMSError(1, log)
 
-        Utils._print('Done!\n', quiet=quiet)
+        utils.Utils.print('Done!\n', quiet=quiet)
 
         quiet_param = ''
         if quiet:
@@ -158,14 +161,15 @@ class Tiler:
             quiet=quiet_param,
         )
 
-        log = 'Generating tiles with command: {}'.format(command)
-        Utils._print(log, quiet=quiet)
+        log = f'Generating tiles with command: {command}'
+        utils.Utils.print(log, quiet=quiet)
+        utils.Utils.subprocess(command)
 
-        Utils._subprocess(command)
-
-        log = 'Tiler process finished!' + \
-            'Tiles Available on {}'.format(output_folder)
-        Utils._print(log, quiet=quiet)
+        log = (
+            f'Tiler process terminated!'
+            f'Tiles Available on {output_folder}'
+        )
+        utils.Utils.print(log, quiet=quiet)
 
         return output_folder
 
@@ -173,7 +177,7 @@ class Tiler:
     def create_xml(
         cls,
         image_path: str,
-        image: Image,
+        image: image_info.Image,
         base_link: str,
         max_zoom: int = 15,
         output_folder: str = 'tms/',
@@ -185,7 +189,8 @@ class Tiler:
 
         Args:
             image_path (str): path to image.
-            image (Image): `hex_raster_processor.Image` instance.
+            image (image_info.Image):
+                `hex_raster_processor.image_info.Image` instance.
             base_link (str): base link that indicates where files
                 will be available.
             max_zoom (int, optional): max zoom to image. Defaults to 15.
@@ -193,78 +198,83 @@ class Tiler:
             quiet (bool, optional): show logs. Defaults to True.
 
         Raises:
-            XMLError: image info could not be founded not.
+            exceptions.XMLError: image info could not be founded not.
 
         Returns:
             str: output path to xml file.
         """
 
-        Utils._print('Getting info from image using gdalinfo...', quiet=quiet)
+        utils.Utils.print(
+            'Getting info from image using gdalinfo...', quiet=quiet)
 
         if base_link.endswith('/'):
             base_link = os.path.join(base_link, '')
 
         try:
-            image_info = Tiler._get_image_info(image_path=image_path)
-            upper_left = image_info['cornerCoordinates']['upperLeft']
-            lower_right = image_info['cornerCoordinates']['lowerRight']
-            Utils._print('Done!\n', quiet=quiet)
+            image_data = Tiler._get_image_info(image_path=image_path)
+            upper_left = image_data['cornerCoordinates']['upperLeft']
+            lower_right = image_data['cornerCoordinates']['lowerRight']
+            utils.Utils.print('Done!\n', quiet=quiet)
         except Exception as exc:
-            raise XMLError(1, exc)
+            raise exceptions.XMLError(1, exc)
 
-        coordinates = "<UpperLeftX> {0} </UpperLeftX >\n\
-            <UpperLeftY> {1} </UpperLeftY>\n\
-            <LowerRightX> {2} </LowerRightX>\n\
-            <LowerRightY> {3} </LowerRightY>\n"\
-        .format(
-            upper_left[0],
-            upper_left[1],
-            lower_right[0],
-            lower_right[1]
+        coordinates_data_window = (
+            '\t\t<UpperLeftX>-20037508.34</UpperLeftX>\n'
+            '\t\t<UpperLeftY>20037508.34</UpperLeftY>\n'
+            '\t\t<LowerRightX>20037508.34</LowerRightX>\n'
+            '\t\t<LowerRightY>-20037508.34</LowerRightY>'
         )
 
-        xml_data = '<GDAL_WMS>\n\
-            <Service name="TMS">\n\
-                <ServerUrl>{0}/{1}.tms/${{z}}/${{x}}/${{y}}.png</ServerUrl>\n\
-                <SRS>EPSG:3857</SRS>\n\
-                <ImageFormat>image/png</ImageFormat>\n\
-            </Service>\n\
-            <DataWindow>\n\
-                {3}\n\
-                <TileLevel>{2}</TileLevel>\n\
-                <TileCountX>1</TileCountX>\n\
-                <TileCountY>1</TileCountY>\n\
-                <YOrigin>bottom</YOrigin>\n\
-            </DataWindow>\n\
-            <TargetWindow>\n\
-                {3}\n\
-            </TargetWindow>\n\
-            <Projection>EPSG:3857</Projection>\n\
-            <BlockSizeX>256</BlockSizeX>\n\
-            <BlockSizeY>256</BlockSizeY>\n\
-            <BandsCount>4</BandsCount>\n\
-            <ZeroBlockHttpCodes>204,303,400,404,500,501</ZeroBlockHttpCodes>\n\
-            <ZeroBlockOnServerException>true</ZeroBlockOnServerException>\n\
-            <Cache>\n\
-                <Path>./gdalwmscache/cache_{4}.tms</Path>\n\
-            </Cache>\n\
-        </GDAL_WMS>'.format(
-            base_link,
-            image.image_name,
-            max_zoom,
-            coordinates,
-            image.image_name
+        coordinates_target_window = (
+            f'\t\t<UpperLeftX> {upper_left[0]} </UpperLeftX>\n'
+            f'\t\t<UpperLeftY> {upper_left[1]} </UpperLeftY>\n'
+            f'\t\t<LowerRightX> {lower_right[0]} </LowerRightX>\n'
+            f'\t\t<LowerRightY> {lower_right[1]} </LowerRightY>'
         )
 
-        filename = image.image_name + '.xml'
+        xml_data = (
+            f'<GDAL_WMS>\n'
+            f'\t<Service name="TMS">\n'
+            f'\t\t<ServerUrl>{base_link}/{image.image_name}.tms/'
+            f'${{z}}/${{x}}/${{y}}.png</ServerUrl>\n'
+            f'\t\t<SRS>EPSG:3857</SRS>\n'
+            f'\t\t<ImageFormat>image/png</ImageFormat>\n'
+            f'\t</Service>\n'
+            f'\t<DataWindow>\n'
+            f'{coordinates_data_window}\n'
+            f'\t\t<TileLevel>{max_zoom}</TileLevel>\n'
+            f'\t\t<TileCountX>1</TileCountX>\n'
+            f'\t\t<TileCountY>1</TileCountY>\n'
+            f'\t\t<YOrigin>bottom</YOrigin>\n'
+            f'\t</DataWindow>\n'
+            f'\t<TargetWindow>\n'
+            f'{coordinates_target_window}\n'
+            f'\t</TargetWindow>\n'
+            f'\t<Projection>EPSG:3857</Projection>\n'
+            f'\t<BlockSizeX>256</BlockSizeX>\n'
+            f'\t<BlockSizeY>256</BlockSizeY>\n'
+            f'\t<BandsCount>4</BandsCount>\n'
+            f'\t<ZeroBlockHttpCodes>'
+            f'204,303,400,404,500,501'
+            f'</ZeroBlockHttpCodes>\n'
+            f'\t<ZeroBlockOnServerException>'
+            f'true'
+            f'</ZeroBlockOnServerException>\n'
+            f'\t<Cache>\n'
+            f'\t\t<Path>./gdalwmscache/cache_{image.image_name}.tms</Path>\n'
+            f'\t</Cache>\n'
+            f'</GDAL_WMS>'
+        )
+
+        filename = f'{image.image_name}.xml'
         output_path = os.path.join(output_folder, filename)
 
-        Utils._print('Creating xml file...', quiet=quiet)
+        utils.Utils.print('Creating xml file...', quiet=quiet)
 
-        with open(output_path, 'w') as f:
-            f.write(xml_data)
+        with open(output_path, 'w') as output_file:
+            output_file.write(xml_data)
 
-        Utils._print('Done!\n', quiet)
+        utils.Utils.print('Done!', quiet)
 
         return filename
 
@@ -308,13 +318,13 @@ class Tiler:
                 Defaults to False.
 
         Raises:
-            TMSError: move process error.
+            exceptions.TMSError: move process error.
 
         Returns:
             tuple: TMS service name, XML name
 
         """
-        input_image = Image(image_path)
+        input_image = image_info.Image(image_path)
 
         if convert:
             converted_image = Tiler.gdal_translate_byte_and_scale(
@@ -322,24 +332,25 @@ class Tiler:
                 output_path=input_image.get_tempfile(),
                 quiet=quiet
             )
-            converted_image = Image(converted_image)
+            converted_image = image_info.Image(converted_image)
         else:
             converted_image = input_image
 
         if contrast:
-            contrasted_image = GdalContrastStretch.get_image(
+            contrasted_image = contrast_stretch.GdalContrastStretch.get_image(
                 input_file=converted_image.image_path,
                 output_path=converted_image.get_tempfile(),
                 constrast_range=contrast_range
             )
-            contrasted_image = Image(contrasted_image)
+            contrasted_image = image_info.Image(contrasted_image)
         else:
             contrasted_image = converted_image
 
         if move:
-            output_folder_name = Utils.create_tempdir()
+            output_folder_name = utils.Utils.create_tempdir()
         else:
-            output_folder_name = Utils.check_creation_folder(output_folder)
+            output_folder_name = utils.Utils.check_creation_folder(
+                output_folder)
 
         tms = Tiler.create_tms(
             image_path=contrasted_image.image_path,
@@ -361,29 +372,30 @@ class Tiler:
         if convert:
             converted_image.remove_file()
 
-        tms_path = os.path.join(tms, converted_image.image_name + '.tms')
+        tms_path = os.path.join(tms, f'{converted_image.image_name}.tms')
         xml_path = os.path.join(output_folder_name, xml)
 
         if move:
-            output_path = Utils.check_creation_folder(output_folder)
-            log = 'Trying to move files from {} and {} to {}'.format(
-                tms_path, xml_path, output_path)
-
+            output_path = utils.Utils.check_creation_folder(output_folder)
+            log = (
+                f'Trying to move files from '
+                f'{tms_path} and {xml_path} to {output_path}'
+            )
             try:
-                Utils.move_path_files(tms_path, output_path)
-                Utils.move_path_files(xml_path, output_path)
-                Utils._print(log, quiet=quiet)
+                utils.Utils.move_path_files(tms_path, output_path)
+                utils.Utils.move_path_files(xml_path, output_path)
+                utils.Utils.print(log, quiet=quiet)
 
                 xml_path = os.path.join(output_path, xml)
                 tms_path = os.path.join(
                     output_path, converted_image.image_name + '.tms')
 
-                Utils._print('Move process finished', quiet=quiet)
+                utils.Utils.print('Move process finished', quiet=quiet)
             except Exception as exc:
                 log = 'Move process with error: {}'.format(exc)
-                raise TMSError(2, log)
+                raise exceptions.TMSError(2, log)
 
-        log = 'Tiles path: {}\nXML File: {}'.format(tms_path, xml)
-        Utils._print(log, quiet=quiet)
+        log = f'Tiles path: {tms_path}\nXML File: {xml}'
+        utils.Utils.print(log, quiet=quiet)
 
         return tms_path, xml_path
