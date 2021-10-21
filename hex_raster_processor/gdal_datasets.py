@@ -17,7 +17,7 @@ class GdalDatasets:
 
         Check http://www.gdal.org/gdaldem.html for more details.
 
-        Arguments:
+        Args:
             img_type (str, optional): type of image to get text file.
                 Must be in ['NDVI', 'NDWI', 'NBR', 'NDMI', 'NDSI', 'NPCRI'].
 
@@ -127,7 +127,7 @@ class GdalDatasets:
             next(tempfile._get_candidate_names())
         )
 
-        with open(filename, 'w') as f:
-            f.write(filetext)
+        with open(filename, 'w') as outputfile:
+            outputfile.write(filetext)
 
         return filename

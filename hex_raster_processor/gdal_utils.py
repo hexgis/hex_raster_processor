@@ -86,8 +86,10 @@ class GdalUtils(GdalDatasets):
                 bands=bands
             )
         except Exception as exc:
-            log = 'Error at GdalUtils create_compositon_thumbs ' + \
-                'for {} with exception: {}'.format(ordered_filelist, exc)
+            log = (
+                f'Error at GdalUtils create_compositon_thumbs '
+                f'for {ordered_filelist} with exception: {exc}'
+            )
             logger.exception(log)
             logger.exception(exc)
             raise
@@ -135,18 +137,22 @@ class GdalUtils(GdalDatasets):
                 x=size[0],
                 y=size[1]
             )
-            Utils._subprocess(command)
+            Utils.subprocess(command)
         except AssertionError:
-            log = 'Input file does not exists. ' + \
-                'Exception at GdalUtils.thumbs with params: ' + \
-                'input_image={} output_path= {} and size=[{},{}]'.format(
-                    input_image, output_path, size[0], size[1])
+            log = (
+                f'Input file does not exists. '
+                f'Exception at GdalUtils.thumbs with params: '
+                f'input_image={input_image}, output_path={output_path} '
+                f'and size=[{size[0]},{size[1]}]'
+            )
             logger.info(log)
             raise
         except Exception as exc:
-            log = 'Exception at GdalUtils.thumbs with params: ' + \
-                'input_image={} output_path= {} and size=[{},{}]'.format(
-                    input_image, output_path, size[0], size[1])
+            log = (
+                f'Exception at GdalUtils.thumbs with params: '
+                f'input_image={input_image}, output_path={output_path} '
+                f'and size=[{size[0]},{size[1]}]'
+            )
             logger.exception(log)
             logger.exception(exc)
             raise
@@ -196,7 +202,7 @@ class GdalUtils(GdalDatasets):
                 y=size[1],
             )
 
-            Utils._subprocess(thumbs_command)
+            Utils.subprocess(thumbs_command)
 
             if os.path.exists(temp_files[img].name):
                 files.append(temp_files[img].name)
@@ -242,14 +248,14 @@ class GdalUtils(GdalDatasets):
             temp_dir.name,
             next(tempfile._get_candidate_names()) + '.shp')
 
-        Utils._subprocess('gdalwarp -dstnodata 0 -dstalpha -of GTiff ' +
-                          image_filename + ' ' + temp_1.name)
-        Utils._subprocess('gdal_translate -b mask -of vrt -a_nodata 0 ' +
-                          temp_1.name + ' ' + temp_2.name)
-        Utils._subprocess('gdal_translate -b 1 -of vrt -a_nodata 0 ' +
-                          temp_2.name + ' ' + temp_3.name)
-        Utils._subprocess('gdal_polygonize.py -8 ' + temp_3.name + ' -b 1 ' +
-                          '-f "ESRI Shapefile" ' + footprint_path)
+        Utils.subprocess('gdalwarp -dstnodata 0 -dstalpha -of GTiff ' +
+                         image_filename + ' ' + temp_1.name)
+        Utils.subprocess('gdal_translate -b mask -of vrt -a_nodata 0 ' +
+                         temp_1.name + ' ' + temp_2.name)
+        Utils.subprocess('gdal_translate -b 1 -of vrt -a_nodata 0 ' +
+                         temp_2.name + ' ' + temp_3.name)
+        Utils.subprocess('gdal_polygonize.py -8 ' + temp_3.name + ' -b 1 ' +
+                         '-f "ESRI Shapefile" ' + footprint_path)
 
         dataset = ogr.Open(footprint_path)
         layer = dataset.GetLayer()
@@ -320,7 +326,7 @@ class GdalUtils(GdalDatasets):
             output_path=temp_file.name
         )
 
-        Utils._subprocess(command)
+        Utils.subprocess(command)
 
         return GdalUtils.thumbs(
             input_image=temp_file.name,
