@@ -3,7 +3,7 @@
 
 
 class TMSError(Exception):
-    """ Class for TMS error exception. """
+    """Class for TMS error exception."""
 
     def __init__(self, code, message):
         super().__init__(message)
@@ -11,7 +11,7 @@ class TMSError(Exception):
 
 
 class XMLError(Exception):
-    """ Class for XML error exception. """
+    """Class for XML error exception."""
 
     def __init__(self, code, message):
         super().__init__(message)
@@ -19,7 +19,7 @@ class XMLError(Exception):
 
 
 class ValidationBandError(Exception):
-    """ Class for Validation band exception. """
+    """Class for Validation band exception."""
 
     def __init__(self, code, message):
         super().__init__(message)
