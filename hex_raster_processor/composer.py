@@ -39,7 +39,7 @@ class Composer:
            filename.endswith('.TIFF'):
             return os.path.join(output_path, filename)
 
-        filename = '{}_{}.TIF'.format(filename, type_name)
+        filename = f'{filename}_{type_name}.TIF'
         return os.path.join(output_path, filename)
 
     @classmethod
@@ -82,7 +82,7 @@ class Composer:
 
         type_name = 'r{0}g{1}b{2}'.format(*bands)
 
-        file_path = Composer.get_image_output_path(
+        filepath = Composer.get_image_output_path(
             filename=filename,
             output_path=output_path,
             type_name=type_name
@@ -92,24 +92,23 @@ class Composer:
 
         if quiet:
             quiet_param = ' -q '
-            log = 'Creating file composition from {} to {}'.format(
-                filename, file_path)
-            Utils._print(log, quiet=quiet)
+            log = f'Creating file composition from {filename} to {filepath}'
+            Utils.print(log, quiet=quiet)
 
         command = Composer.get_gdal_merge_command()
-        command = command.format(quiet=quiet_param, output_path=file_path)
+        command = command.format(quiet=quiet_param, output_path=filepath)
         command += ' '.join(map(str, ordered_filelist))
 
         for band in ordered_filelist:
             Utils.validate_band(band)
 
-        Utils._subprocess(command)
+        Utils.subprocess(command)
 
-        is_valid = Utils.validate_image_bands(file_path, ordered_filelist)
+        is_valid = Utils.validate_image_bands(filepath, ordered_filelist)
 
         if is_valid:
             return {
-                'name': file_path.split('/')[-1],
-                'path': file_path,
+                'name': filepath.split('/')[-1],
+                'path': filepath,
                 'type': type_name
             }
