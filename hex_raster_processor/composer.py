@@ -3,6 +3,8 @@
 
 import os
 import logging
+import tempfile
+import shutil
 
 from .utils import Utils
 
@@ -43,6 +45,47 @@ class Composer:
         return os.path.join(output_path, filename)
 
     @classmethod
+    def get_temporary_filename(cls):
+        """Get temporary filename from tempfile package.
+
+        Returns tempfile._get_candidate_names() joined with tempdir.
+
+        Returns:
+            str: temporary filename.
+        """
+        return os.path.join(
+            tempfile.tempdir,
+            next(tempfile._get_candidate_names())
+        )
+
+    @classmethod
+    def delete_temporary_file(cls, filepath: str):
+        """Delete filepath using shutil package.
+
+        Args:
+            filepath (str): path to file
+
+        Returns:
+            bool: file removed.
+        """
+        if os.path.exists(filepath) and os.path.isfile(filepath):
+            os.remove(filepath)
+
+        return os.path.exists(filepath) and os.path.isfile(filepath)
+
+    @classmethod
+    def get_gdal_translate_8bits_command(cls):
+        """Returns gdal merge shell command.
+
+        docs available on https://gdal.org/programs/gdal_merge.html.
+
+        Returns:
+            str: shell command.
+        """
+        return 'gdal_translate -of GTiff -ot Byte -scale 0 65535 ' + \
+            '0 255 {quiet} {input_path} {output_path}'
+
+    @classmethod
     def get_gdal_merge_command(cls):
         """Returns gdal merge shell command.
 
@@ -60,6 +103,7 @@ class Composer:
         ordered_filelist: str,
         output_path: str,
         bands: list,
+        scale: bool = True,
         quiet: bool = True
     ):
         """Creates image composition using gdal merge with ordered filelist.
@@ -67,20 +111,24 @@ class Composer:
         docs available on https://gdal.org/programs/gdal_merge.html.
 
         Args:
-            filename (str): output name for file.
-                E.g.: my_file, my_file.tif
-            ordered_filelist (str): list of images to merge.
-            output_path (str): output path name for image.
-            bands (list): list with bands numbers to create image number.
-                E.g.: 6,5,4 -> r6g5b4
-            quiet (bool, optional): show logs.
-                Defaults to True.
+            filename (str): output filename.
+            ordered_filelist (str): input filelist to create composition.
+            output_path (str): output dir to save file.
+            bands (list): list of bands to create image name.
+                E.g.: [6,5,4] returns r6g5b4.TIF filename.
+            scale (bool, optional): Scale image to 8 bits. Defaults to True.
+            quiet (bool, optional): don't show proces logs. Defaults to True.
+
+        Raises:
+            ValidationBandError: error while reading ordered_filelist.
 
         Returns:
-            str: output path for merged image
+            str: output path to created file.
         """
+        type_name = f'r{bands[0]}g{bands[1]}b{bands[2]}'
 
-        type_name = 'r{0}g{1}b{2}'.format(*bands)
+        for band in ordered_filelist:
+            Utils.validate_band(band)
 
         filepath = Composer.get_image_output_path(
             filename=filename,
@@ -89,24 +137,38 @@ class Composer:
         )
 
         quiet_param = ''
-
         if quiet:
             quiet_param = ' -q '
-            log = f'Creating file composition from {filename} to {filepath}'
-            Utils.print(log, quiet=quiet)
+            logger.info(
+                msg=f'Creating composition from {filename} to {filepath}'
+            )
 
+        merged_file = Composer.get_temporary_filename()
         command = Composer.get_gdal_merge_command()
-        command = command.format(quiet=quiet_param, output_path=filepath)
+        command = command.format(
+            quiet=quiet_param,
+            output_path=merged_file
+        )
         command += ' '.join(map(str, ordered_filelist))
-
-        for band in ordered_filelist:
-            Utils.validate_band(band)
-
         Utils.subprocess(command)
+        temporary_file = merged_file
 
-        is_valid = Utils.validate_image_bands(filepath, ordered_filelist)
+        if scale:
+            scale_file = Composer.get_temporary_filename()
+            command = Composer.get_gdal_translate_8bits_command()
+            command = command.format(
+                quiet=quiet_param,
+                input_path=merged_file,
+                output_path=scale_file
+            )
+            Utils.subprocess(command)
+            temporary_file = scale_file
 
-        if is_valid:
+        shutil.move(temporary_file, filepath)
+        Composer.delete_temporary_file(scale_file)
+        Composer.delete_temporary_file(merged_file)
+
+        if Utils.validate_image_bands(filepath, ordered_filelist):
             return {
                 'name': filepath.split('/')[-1],
                 'path': filepath,
