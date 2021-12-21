@@ -13,12 +13,12 @@ jobs:
           command: |
             apt-get update -y 
             apt-get install -y python3-setuptools build-essential libgnutls28-dev python3-pip python-dev python-pil python-gdal libgdal-dev gdal-bin dans-gdal-scripts
-            python3 -m pip install --upgrade pip
       - run:
           name: Creating venv and install packages
           command: |
             python3 -m venv app_env
             . app_env/bin/activate
+            pip install --upgrade --no-cache-dir setuptools==57.5.0
             pip install numpy
             pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
             pip install --no-cache-dir -r requirements_dev.txt
