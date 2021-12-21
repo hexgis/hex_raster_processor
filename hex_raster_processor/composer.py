@@ -54,7 +54,7 @@ class Composer:
             str: temporary filename.
         """
         return os.path.join(
-            tempfile.tempdir,
+            tempfile._get_default_tempdir(),
             next(tempfile._get_candidate_names())
         )
 
