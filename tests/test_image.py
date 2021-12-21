@@ -62,12 +62,12 @@ def test_image_info(create_image, get_default_data):
     product = get_default_data.get("product")
 
     data = create_image
-    assert(data[0].image_path == data[2])
-    assert(data[1].image_path == data[3])
-    assert(data[0].image_dir == local_path)
-    assert(data[1].image_dir == local_path)
-    assert(data[0].image_name == product + "_r4b3g2")
-    assert(data[1].image_name == product + "_r4b3g2")
+    assert data[0].image_path == data[2]
+    assert data[1].image_path == data[3]
+    assert data[0].image_dir == local_path
+    assert data[1].image_dir == local_path
+    assert data[0].image_name == product + "_r4b3g2"
+    assert data[1].image_name == product + "_r4b3g2"
 
 
 def test_image_rename(create_image, get_default_data):
@@ -78,25 +78,25 @@ def test_image_rename(create_image, get_default_data):
     image = data[0]
     image.rename_file("my_image")
 
-    assert(image.image_path == os.path.join(local_path, 'my_image'))
-    assert(image.image_name == 'my_image')
-    assert(image.image_dir == local_path)
-    assert(os.path.exists(image.image_path))
+    assert image.image_path == os.path.join(local_path, 'my_image')
+    assert image.image_name == 'my_image'
+    assert image.image_dir == local_path
+    assert os.path.exists(image.image_path)
     image.remove_file()
-    assert(not os.path.exists(image.image_path))
+    assert not os.path.exists(image.image_path)
 
 
 def test_remove_file(create_image):
     """ Test remove files from Image. """
     data = create_image
-    assert(os.path.exists(data[0].image_path))
-    assert(os.path.exists(data[1].image_path))
+    assert os.path.exists(data[0].image_path)
+    assert os.path.exists(data[1].image_path)
 
     data[0].remove_file()
     data[1].remove_file()
 
-    assert(not os.path.exists(data[0].image_path))
-    assert(not os.path.exists(data[1].image_path))
+    assert not os.path.exists(data[0].image_path)
+    assert not os.path.exists(data[1].image_path)
 
 
 def test_create_tempfile(create_image):

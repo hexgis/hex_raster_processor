@@ -37,12 +37,12 @@ def test_thumbs_composition_band(get_default_data):
     output_dir = get_default_data.get("output_dir")
     output_path = os.path.join(output_dir, 'thumbs_band.jpeg')
 
-    assert(downloaded)
-    assert(not os.path.exists(output_path))
+    assert downloaded
+    assert not os.path.exists(output_path)
 
     thumbs = GdalUtils.thumbs(downloaded[0], output_path, quiet=QUIET)
-    assert(os.path.exists(output_path))
-    assert(thumbs)
+    assert os.path.exists(output_path)
+    assert thumbs
 
     if not KEEP_FILES:
         remove_file(output_path)
@@ -55,7 +55,7 @@ def test_thumbs_composition(get_default_data):
     output_dir = get_default_data.get("output_dir")
     product = get_default_data.get("product")
 
-    assert(downloaded)
+    assert downloaded
 
     band_number = 6
     for band in downloaded[:3]:
@@ -75,16 +75,16 @@ def test_thumbs_composition(get_default_data):
         bands=[6, 5, 4],
         quiet=QUIET
     )
-    assert(composition)
-    assert(composition['type'] == 'r6g5b4')
+    assert composition
+    assert composition['type'] == 'r6g5b4'
 
     output = os.path.join(output_dir, 'thumbs_composition.jpeg')
     remove_file(output)
-    assert(not os.path.exists(output))
+    assert not os.path.exists(output)
 
     thumbs = GdalUtils.thumbs(composition['path'], output, quiet=QUIET)
-    assert(thumbs)
-    assert(os.path.exists(output))
+    assert thumbs
+    assert os.path.exists(output)
     if not KEEP_FILES:
         remove_file(output)
         remove_file(output + ".aux.xml")
@@ -94,10 +94,10 @@ def test_thumbs_composition_rgb(get_default_data):
     """ Test thumbs composition rgb. """
     output_dir = get_default_data.get("output_dir")
     downloaded = download_images(bands=[6, 5, 4])
-    assert(len(downloaded) == 5)  # +BQA and MTL
+    assert len(downloaded) == 5  # +BQA and MT
     output = os.path.join(output_dir, 'composite_file.jpeg')
     thumbs = GdalUtils.composition_rgb_thumbs(downloaded[:3], output)
-    assert(thumbs)
+    assert thumbs
 
     if not KEEP_FILES:
         remove_file(output)
@@ -107,10 +107,10 @@ def test_thumbs_composition_rgb(get_default_data):
 def test_generate_footprint(get_default_data):
     """ Test gdal create thumbs. """
     downloaded = download_images(bands=[4])
-    assert(downloaded)
+    assert downloaded
     footprint = GdalUtils.generate_footprint(downloaded[0], simplify=50)
-    assert(footprint is not None)
-    assert(footprint != 'POLYGON EMPTY')
+    assert footprint is not None
+    assert footprint != 'POLYGON EMPTY'
 
 
 def test_create_text_files(get_default_data):

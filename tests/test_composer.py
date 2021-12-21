@@ -35,7 +35,7 @@ def test_create_composition_with_downloaded_images(get_default_data):
     output_dir = get_default_data.get("output_dir")
 
     download = download_images(bands=[6, 5, 4])
-    assert(len(download) == 5)
+    assert len(download) == 5
 
     composition = Composer.create_composition(
         filename=product,
@@ -45,8 +45,8 @@ def test_create_composition_with_downloaded_images(get_default_data):
         quiet=QUIET
     )
 
-    assert(composition["type"] == "r6g5b4")
-    assert(composition["name"] == "{}_r6g5b4.TIF".format(product))
+    assert composition["type"] == "r6g5b4"
+    assert composition["name"] == "{}_r6g5b4.TIF".format(product)
 
 
 def test_create_composition_with_downloaded_images_error(get_default_data):
@@ -56,7 +56,7 @@ def test_create_composition_with_downloaded_images_error(get_default_data):
     output_dir = get_default_data.get("output_dir")
 
     download = download_images(bands=[6, 5, 4])
-    assert(len(download) == 5)
+    assert len(download) == 5
 
     test_error = [download[0], download[1], 'test_error.tif']
 

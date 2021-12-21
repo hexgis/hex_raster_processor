@@ -54,7 +54,7 @@ def create_data(get_default_data):
 
 def test_os_environ_gdal_tiler():
     """ Test if tilers-tools is present on system environmets. """
-    assert('tilers-tools' in os.environ["PATH"])
+    assert 'tilers-tools' in os.environ["PATH"]
 
 
 def test_call_gdal_tiler(create_data):
@@ -65,21 +65,21 @@ def test_call_gdal_tiler(create_data):
         zoom, create_data['output_path'], create_data['tiffile'])
     subprocess.call(cmd, shell=True)
 
-    assert(os.path.exists(create_data['output_path']))
-    assert(os.path.exists(create_data['output_path_check']))
+    assert os.path.exists(create_data['output_path'])
+    assert os.path.exists(create_data['output_path_check'])
 
     output_path = os.path.join(create_data['output_path_check'], '7')
-    assert(os.path.exists(output_path))
+    assert os.path.exists(output_path)
 
     output_path = os.path.join(create_data['output_path_check'], '8')
-    assert(not os.path.exists(output_path))
+    assert not os.path.exists(output_path)
 
     cmd = 'gdal_tiler.py -p tms --src-nodata 0 --zoom=7:8 -t {} {}'.format(
         create_data['output_path'], create_data['tiffile']),
     subprocess.call(cmd, shell=True)
 
     output_path = os.path.join(create_data['output_path_check'], '8')
-    assert(os.path.exists(output_path))
+    assert os.path.exists(output_path)
     shutil.rmtree(create_data['output_path_check'])
 
 
@@ -95,19 +95,19 @@ def test_tiler_make_tiles(create_data):
         nodata=[0]
     )
 
-    assert(os.path.isfile(create_data['tiffile']))
-    assert(len(data) == 2)
-    assert(data[0] == create_data['output_path_check'])
-    assert(os.path.exists(data[0]))
-    assert(os.path.isfile(data[1]))
+    assert os.path.isfile(create_data['tiffile'])
+    assert len(data) == 2
+    assert data[0] == create_data['output_path_check']
+    assert os.path.exists(data[0])
+    assert os.path.isfile(data[1])
 
     zoom_7 = os.path.join(data[0], '7')
     zoom_8 = os.path.join(data[0], '8')
     zoom_9 = os.path.join(data[0], '9')
 
-    assert(os.path.exists(zoom_7))
-    assert(os.path.exists(zoom_8))
-    assert(not os.path.exists(zoom_9))
+    assert os.path.exists(zoom_7)
+    assert os.path.exists(zoom_8)
+    assert not os.path.exists(zoom_9)
 
 
 def test_tiler_make_tiles_with_gdal_contrast(create_data):
@@ -122,19 +122,19 @@ def test_tiler_make_tiles_with_gdal_contrast(create_data):
         nodata=[0]
     )
 
-    assert(os.path.isfile(create_data['tiffile']))
-    assert(len(data) == 2)
-    assert(data[0] == create_data['output_path_check'])
-    assert(os.path.exists(data[0]))
-    assert(os.path.isfile(data[1]))
+    assert os.path.isfile(create_data['tiffile'])
+    assert len(data) == 2
+    assert data[0] == create_data['output_path_check']
+    assert os.path.exists(data[0])
+    assert os.path.isfile(data[1])
 
     zoom_7 = os.path.join(data[0], '7')
     zoom_8 = os.path.join(data[0], '8')
     zoom_9 = os.path.join(data[0], '9')
 
-    assert(os.path.exists(zoom_7))
-    assert(os.path.exists(zoom_8))
-    assert(not os.path.exists(zoom_9))
+    assert os.path.exists(zoom_7)
+    assert os.path.exists(zoom_8)
+    assert not os.path.exists(zoom_9)
 
 
 def test_tiler_make_tiles_exception(create_data):
@@ -191,9 +191,9 @@ def test_tiler_make_tiles_with_move(create_data):
         nodata=[0]
     )
 
-    assert(os.path.isfile(create_data['tiffile']))
-    assert(os.path.exists(tms_path))
-    assert(os.path.isfile(xml_path))
+    assert os.path.isfile(create_data['tiffile'])
+    assert os.path.exists(tms_path)
+    assert os.path.isfile(xml_path)
 
     zoom_7 = os.path.join(tms_path, '7')
     zoom_8 = os.path.join(tms_path, '8')
@@ -201,11 +201,11 @@ def test_tiler_make_tiles_with_move(create_data):
     zoom_10 = os.path.join(tms_path, '10')
     zoom_11 = os.path.join(tms_path, '11')
 
-    assert(os.path.exists(zoom_7))
-    assert(os.path.exists(zoom_8))
-    assert(os.path.exists(zoom_9))
-    assert(os.path.exists(zoom_10))
-    assert(not os.path.exists(zoom_11))
+    assert os.path.exists(zoom_7)
+    assert os.path.exists(zoom_8)
+    assert os.path.exists(zoom_9)
+    assert os.path.exists(zoom_10)
+    assert not os.path.exists(zoom_11)
 
 
 def test_tiler_make_tiles_with_move_stress(create_data):
@@ -222,14 +222,14 @@ def test_tiler_make_tiles_with_move_stress(create_data):
             quiet=False,
             nodata=[0]
         )
-        assert(os.path.isfile(create_data['tiffile']))
-        assert(os.path.exists(tms_path))
-        assert(os.path.isfile(xml_path))
+        assert os.path.isfile(create_data['tiffile'])
+        assert os.path.exists(tms_path)
+        assert os.path.isfile(xml_path)
 
         zoom_6 = os.path.join(tms_path, '6')
         zoom_7 = os.path.join(tms_path, '7')
         zoom_8 = os.path.join(tms_path, '8')
 
-        assert(os.path.exists(zoom_6))
-        assert(os.path.exists(zoom_7))
-        assert(not os.path.exists(zoom_8))
+        assert os.path.exists(zoom_6)
+        assert os.path.exists(zoom_7)
+        assert not os.path.exists(zoom_8)
