@@ -14,7 +14,7 @@ jobs:
             apt-get update -y 
             apt-get install -y python3-setuptools build-essential libgnutls28-dev python3-pip python-dev
             apt-get install -y python-pil python-gdal libgdal-dev gdal-bin dans-gdal-scripts
-            python3 -m pip install --upgrade --no-cache-dir setuptools==58.0.4
+            python3 -m pip install --upgrade --no-cache-dir setuptools==57.5.0
       - run:
           name: Creating venv and install packages
           command: |
