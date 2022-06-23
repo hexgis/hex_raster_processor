@@ -165,7 +165,10 @@ class Composer:
             temporary_file = scale_file
 
         shutil.move(temporary_file, filepath)
-        Composer.delete_temporary_file(scale_file)
+
+        if scale_file:
+            Composer.delete_temporary_file(scale_file)
+
         Composer.delete_temporary_file(merged_file)
 
         if Utils.validate_image_bands(filepath, ordered_filelist):

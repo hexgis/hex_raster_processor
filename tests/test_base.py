@@ -53,7 +53,7 @@ def download_image(url, path):
 
 def download_images(
     scene="LC08_L1TP_221071_20170521_20170526_01_T1",
-    url="https://landsat-pds.s3.amazonaws.com/c1/L8/221/071",
+    url=None,
     output_dir="test_media/",
     bands=[6, 5, 4]
 ):
@@ -71,6 +71,10 @@ def download_images(
     """
     downloaded_images = []
     path = Utils.check_creation_folder(output_dir)
+
+    if not url:
+        url = "https://storage.googleapis.com/" + \
+            "gcp-public-data-landsat/LC08/01/221/071"
 
     scene_bands = [{
         "url": "{url}/{scene}/{scene}{band}".format(
