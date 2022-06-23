@@ -27,8 +27,8 @@ ENV C_INCLUDE_PATH=/usr/include/gdal
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 
 # Install system requirements
-RUN apt update -y
-RUN apt install -y \
+RUN apt-get update -y
+RUN apt-get install -y \
     build-essential \
     libgnutls28-dev \
     python3-setuptools \
@@ -40,9 +40,10 @@ RUN apt install -y \
     gdal-bin \
     dans-gdal-scripts \
     && rm -rf /var/lib/apt/lists/*
+RUN pip install --upgrade pip
+RUN pip install setuptools==57.5.0
 RUN pip uninstall gdal -y
-RUN pip install numpy
-RUN pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
+RUN pip install numpy gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
 
 # Install dependencies
 COPY requirements_dev.txt .
