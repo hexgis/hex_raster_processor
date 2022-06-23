@@ -22,7 +22,8 @@ def get_default_data():
     return {
         "bands": [],
         "product": "LC08_L1TP_221071_20170521_20170526_01_T1",
-        "url": "https://landsat-pds.s3.amazonaws.com/c1/L8/221/071",
+        "url": "https://storage.googleapis.com/" +
+               "gcp-public-data-landsat/LC08/01/221/071",
         "output_dir": "test_media/",
         "local_path": local_path
     }
