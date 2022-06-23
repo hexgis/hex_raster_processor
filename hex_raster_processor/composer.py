@@ -166,8 +166,11 @@ class Composer:
 
         shutil.move(temporary_file, filepath)
 
-        if scale_file:
+        try:
+            scale_file
             Composer.delete_temporary_file(scale_file)
+        except NameError:
+            pass
 
         Composer.delete_temporary_file(merged_file)
 
