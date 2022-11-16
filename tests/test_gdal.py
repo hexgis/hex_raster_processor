@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Tests for `hex_raster_processor` package."""
+
 import os
 import pytest
 
@@ -28,14 +29,15 @@ def get_default_data():
         "url": "https://storage.googleapis.com/" +
                "gcp-public-data-landsat/LC08/01/221/071",
         "output_dir": "test_media/",
-        "img_types": ["NDVI", "NDWI", "NBR", "NDMI", "NDSI", "NPCRI"]
+        "img_types": ["NDVI", "NDWI", "NBR", "NDSI", "NPCRI"]
     }
 
 
 def test_thumbs_composition_band(get_default_data):
-    """ Test thumbs composition band. """
+    """Test thumbs composition band."""
+
     downloaded = download_images(bands=[4])
-    output_dir = get_default_data.get("output_dir")
+    output_dir = get_default_data.get('output_dir')
     output_path = os.path.join(output_dir, 'thumbs_band.jpeg')
 
     assert downloaded
@@ -47,14 +49,15 @@ def test_thumbs_composition_band(get_default_data):
 
     if not KEEP_FILES:
         remove_file(output_path)
-        remove_file(output_path + ".aux.xml")
+        remove_file(output_path + '.aux.xml')
 
 
 def test_thumbs_composition(get_default_data):
-    """ Test thumbs composition. """
+    """Test thumbs composition."""
+
     downloaded = download_images(bands=[6, 5, 4])
-    output_dir = get_default_data.get("output_dir")
-    product = get_default_data.get("product")
+    output_dir = get_default_data.get('output_dir')
+    product = get_default_data.get('product')
 
     assert downloaded
 
@@ -67,7 +70,7 @@ def test_thumbs_composition(get_default_data):
         band_number = band_number - 1
         if not KEEP_FILES:
             remove_file(output)
-            remove_file(output + ".aux.xml")
+            remove_file(output + '.aux.xml')
 
     composition = Composer.create_composition(
         filename=product,
@@ -88,12 +91,13 @@ def test_thumbs_composition(get_default_data):
     assert os.path.exists(output)
     if not KEEP_FILES:
         remove_file(output)
-        remove_file(output + ".aux.xml")
+        remove_file(output + '.aux.xml')
 
 
 def test_thumbs_composition_rgb(get_default_data):
-    """ Test thumbs composition rgb. """
-    output_dir = get_default_data.get("output_dir")
+    """Test thumbs composition rgb."""
+
+    output_dir = get_default_data.get('output_dir')
     downloaded = download_images(bands=[6, 5, 4])
     assert len(downloaded) == 5  # +BQA and MT
     output = os.path.join(output_dir, 'composite_file.jpeg')
@@ -102,11 +106,12 @@ def test_thumbs_composition_rgb(get_default_data):
 
     if not KEEP_FILES:
         remove_file(output)
-        remove_file(output + ".aux.xml")
+        remove_file(output + '.aux.xml')
 
 
 def test_generate_footprint(get_default_data):
-    """ Test gdal create thumbs. """
+    """Test gdal create thumbs."""
+
     downloaded = download_images(bands=[4])
     assert downloaded
     footprint = GdalUtils.generate_footprint(downloaded[0], simplify=50)
@@ -115,30 +120,33 @@ def test_generate_footprint(get_default_data):
 
 
 def test_create_text_files(get_default_data):
-    """ Test gdal create text files. """
-    for img_type in get_default_data.get("img_types"):
+    """Test gdal create text files."""
+
+    for img_type in get_default_data.get('img_types'):
         text_file = GdalUtils.get_color_text_file(img_type)
         assert os.path.exists(text_file)
-        assert "/tmp/" in text_file
+        assert '/tmp/' in text_file
 
 
 def test_gdaldem_command_creation(get_default_data):
-    """ Test gdaldem command creation. """
+    """Test gdaldem command creation."""
+
     command = GdalUtils.get_gdal_dem_color_command()
     assert command
-    assert "gdaldem" in command
+    assert 'gdaldem' in command
 
 
 def test_normalized_thumbs_creation(get_default_data):
-    """ Test normalized thumbs creation. """
-    product = get_default_data.get("product")
-    output_dir = get_default_data.get("output_dir")
+    """Test normalized thumbs creation."""
+
+    product = get_default_data.get('product')
+    output_dir = get_default_data.get('output_dir')
 
     downloaded = download_images(bands=[4])
     assert downloaded
 
-    for img_type in get_default_data.get("img_types"):
-        output_path = "{}_{}_thumbs.jpg".format(product, img_type.lower())
+    for img_type in get_default_data.get('img_types'):
+        output_path = '{}_{}_thumbs.jpg'.format(product, img_type.lower())
         output_path = os.path.join(output_dir, output_path)
 
         thumbs = GdalUtils.create_normalized_thumbs(
@@ -151,5 +159,60 @@ def test_normalized_thumbs_creation(get_default_data):
         )
 
         assert thumbs
-        assert "jpg" in thumbs
+        assert 'thumbs' in thumbs
+        assert thumbs.endswith('.jpg')
         assert os.path.exists(thumbs)
+
+
+def test_normalized_image_creation(get_default_data):
+    """Test normalized thumbs creation."""
+
+    product = get_default_data.get('product')
+    output_dir = get_default_data.get('output_dir')
+
+    downloaded = download_images(bands=[4])
+    assert downloaded
+
+    for img_type in get_default_data.get('img_types'):
+        output_path = f'{product}_{img_type.lower()}_normalized.tif'
+        output_path = os.path.join(output_dir, output_path)
+
+        normalized_image = GdalUtils.create_normalized_color_image(
+            input_image=downloaded[0],
+            output_path=output_path,
+            img_type=img_type,
+            contrasted=False,
+            quiet=QUIET
+        )
+
+        assert normalized_image
+        assert 'normalized' in normalized_image
+        assert normalized_image.endswith('.tif')
+        assert os.path.exists(normalized_image)
+
+
+def test_normalized_image_creation_with_contrast(get_default_data):
+    """Test normalized image with contrast creation."""
+
+    product = get_default_data.get('product')
+    output_dir = get_default_data.get('output_dir')
+
+    downloaded = download_images(bands=[4])
+    assert downloaded
+
+    for img_type in get_default_data.get('img_types'):
+        output_path = f'{product}_{img_type.lower()}_contrasted.tif'
+        output_path = os.path.join(output_dir, output_path)
+
+        normalized_image = GdalUtils.create_normalized_color_image(
+            input_image=downloaded[0],
+            output_path=output_path,
+            img_type=img_type,
+            contrasted=True,
+            quiet=QUIET
+        )
+
+        assert normalized_image
+        assert 'contrasted' in normalized_image
+        assert normalized_image.endswith('.tif')
+        assert os.path.exists(normalized_image)

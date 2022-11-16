@@ -10,13 +10,13 @@ from osgeo import ogr, osr
 from .composer import Composer
 from .utils import Utils
 from .gdal_datasets import GdalDatasets
+from .contrast_stretch import GdalContrastStretch
 
 logger = logging.getLogger()
 
 
 class GdalUtils(GdalDatasets):
-    """
-    Utility methods for Gdal processes and their results.
+    """Utility methods for Gdal processes and their results.
 
     Inherits from gdal_datasets::GdalDatasets to get
     get_color_text_file classmethod for color text files.
@@ -27,7 +27,7 @@ class GdalUtils(GdalDatasets):
         cls,
         scale: bool = True,
         quiet: bool = True
-    ):
+    ) -> str:
         """Returns a gdal translate command to resize image.
 
         Check https://gdal.org/programs/gdal_translate.html for more details.
@@ -40,6 +40,7 @@ class GdalUtils(GdalDatasets):
             str: gdal translate shell command with string parameters.
                 Parameters: x, y, img_format, input_path and output_path.
         """
+
         command = 'gdal_translate -ot Byte -outsize {x}% {y}%' \
             ' -of {img_format} {input_path} {output_path}'
 
@@ -52,7 +53,7 @@ class GdalUtils(GdalDatasets):
         return command
 
     @classmethod
-    def get_gdal_dem_color_command(cls):
+    def get_gdal_dem_color_command(cls) -> str:
         """Returns gdaldem command to create a colorized image.
 
         Check http://www.gdal.org/gdaldem.html for more details
@@ -61,11 +62,12 @@ class GdalUtils(GdalDatasets):
             str: gdaldem color-relief shell command with string parameters.
                 Parameters: input_path, color_text and output_path paramters
         """
-        return 'gdaldem color-relief -alpha {input_path}' \
+
+        return 'gdaldem color-relief {input_path}' \
             ' {color_text} {output_path}'
 
     @classmethod
-    def create_composition_thumbs(cls, ordered_filelist: list):
+    def create_composition_thumbs(cls, ordered_filelist: list) -> tuple:
         """Creates a temporary preview for selected composition.
 
         Arguments:
@@ -74,6 +76,7 @@ class GdalUtils(GdalDatasets):
         Returns:
             tuple: path to created preview, temporary filename.
         """
+
         temp_file = tempfile.NamedTemporaryFile(suffix='.tif', delete=False)
         output_path = tempfile.TemporaryDirectory()
         bands = [9, 9, 9]
@@ -104,7 +107,7 @@ class GdalUtils(GdalDatasets):
         img_format: str = 'JPEG',
         scale: bool = True,
         quiet: bool = True
-    ):
+    ) -> str:
         """Creates thumbnails for input image.
 
         Uses gdal_translate shell command to create thumbnails.
@@ -114,7 +117,8 @@ class GdalUtils(GdalDatasets):
             output_path (str): output_path filename in jpg format.
             size (list, optional): list of sizes in % X% Y%. Default: [5, 5].
                 Defaults to [15, 15].
-            img_format (str, optional): output_path format. Defaults to 'JPEG'.
+            img_format (str, optional): image output format.
+                Defaults to 'JPEG'.
             scale (bool, optional): scale image. Defaults to True.
             quiet (bool, optional): show logs. Defaults to True.
 
@@ -125,6 +129,7 @@ class GdalUtils(GdalDatasets):
         Returns:
             str: path to created preview.
         """
+
         try:
             assert os.path.exists(input_image)
             command = GdalUtils.get_gdal_outsize_command(
@@ -167,7 +172,7 @@ class GdalUtils(GdalDatasets):
         size: list = [100, 100],
         scale: bool = True,
         quiet: bool = True
-    ):
+    ) -> str:
         """Generates a preview for ordered_images.
 
         Creates a composition using Composer from raster_processor.
@@ -183,6 +188,7 @@ class GdalUtils(GdalDatasets):
         Returns:
             str: path to created preview.
         """
+
         files = []
         temp_files = dict()
         command = GdalUtils.get_gdal_outsize_command(
@@ -196,7 +202,7 @@ class GdalUtils(GdalDatasets):
 
             thumbs_command = command.format(
                 input_path=img,
-                img_format="GTiff",
+                img_format='GTiff',
                 output_path=temp_files[img].name,
                 x=size[0],
                 y=size[1],
@@ -224,7 +230,7 @@ class GdalUtils(GdalDatasets):
         simplify: float = 0,
         output_type: str = 'wkt',
         EPSG: int = 4674
-    ):
+    ) -> str:
         """Generates footprint for input tif image in WKT format.
 
         Args:
@@ -281,15 +287,74 @@ class GdalUtils(GdalDatasets):
         return output_path
 
     @staticmethod
+    def create_normalized_color_image(
+        input_image: str,
+        output_path: str,
+        img_type: str = 'NDVI',
+        contrasted: bool = True,
+        quiet: bool = True
+    ) -> str:
+        """Creates normalized and colorized image.
+
+        Args:
+            input_image (str): input file path.
+            output_path (str): output path where file will be stored.
+            img_type (str, optional): image preview type.
+                Defaults to 'NDVI'.
+            contrasted (bool, optional): Apply contrast 0.02 - 0.98 on image.
+                Defaults to True.
+            quiet (bool, optional): runs on background. Defaults to False.
+
+        Returns:
+            str: path to colorized image.
+        """
+
+        if not quiet:
+            print(f"-- Creating normalized and colorized image for"
+                  f" {input_image} image in {output_path}")
+
+        Utils.check_creation_folder(os.path.dirname(output_path))
+
+        color_text_file = GdalUtils.get_color_text_file(img_type)
+        command = GdalUtils.get_gdal_dem_color_command()
+
+        if contrasted:
+            temporary_file = tempfile.NamedTemporaryFile(
+                prefix='contrasted_', suffix='.tif')
+
+            command = command.format(
+                input_path=input_image,
+                color_text=color_text_file,
+                output_path=temporary_file.name
+            )
+
+            Utils.subprocess(command)
+
+            input_image = GdalContrastStretch.get_image(
+                input_file=temporary_file.name,
+                output_path=output_path
+            )
+        else:
+            command = command.format(
+                input_path=input_image,
+                color_text=color_text_file,
+                output_path=output_path
+            )
+            Utils.subprocess(command)
+
+        return output_path
+
+    @staticmethod
     def create_normalized_thumbs(
         input_image: str,
         output_path: str,
         size: list = [15, 15],
         img_format: str = 'JPEG',
         img_type: str = 'NDVI',
+        contrasted: bool = True,
         scale: bool = False,
         quiet: bool = True
-    ):
+    ) -> str:
         """Creates preview for input image in JPEG `img_format`.
 
         Do not use in case of default composition thumbs.
@@ -304,32 +369,31 @@ class GdalUtils(GdalDatasets):
             img_format (str, optional): output image format.
                 Defaults to 'JPEG'.
             img_type (str, optional): image preview type. Defaults to 'NDVI'.
+            contrasted (bool, optional): Apply contrast 0.02 - 0.98 on image.
+                Defaults to True.
             scale (bool, optional): scale image. Defaults to False.
-            quiet (bool, optional): [description]. Defaults to True.
+            quiet (bool, optional): runs on background. Defaults to True.
 
         Returns:
             str: path to created preview.
         """
+
         if not quiet:
-            log = "-- Creating NDVI thumbs for {} image in {}"
-            print(log.format(input_image, output_path))
+            print(f"-- Creating thumbs for {input_image} in {output_path}")
 
-        Utils.check_creation_folder(os.path.dirname(output_path))  # Check dir
-
-        color_text_file = GdalUtils.get_color_text_file(img_type)
+        Utils.check_creation_folder(os.path.dirname(output_path))
         temp_file = tempfile.NamedTemporaryFile(prefix='fp', suffix='.tif')
 
-        command = GdalUtils.get_gdal_dem_color_command()
-        command = command.format(
-            input_path=input_image,
-            color_text=color_text_file,
-            output_path=temp_file.name
+        colorized_image = GdalUtils.create_normalized_color_image(
+            input_image=input_image,
+            output_path=temp_file.name,
+            img_type=img_type,
+            contrasted=contrasted,
+            quiet=quiet
         )
 
-        Utils.subprocess(command)
-
         return GdalUtils.thumbs(
-            input_image=temp_file.name,
+            input_image=colorized_image,
             output_path=output_path,
             scale=scale,
             size=size,
