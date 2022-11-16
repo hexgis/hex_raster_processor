@@ -11,4 +11,13 @@ services:
       && pytest"
     volumes:
       - .:/app/
- 
+
+  dev:
+    build: .
+    command: >
+      bash -c "
+      python setup.py develop
+      && python setup.py install
+      && bash"
+    volumes:
+      - .:/app/
